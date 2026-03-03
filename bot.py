@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
 # Inicializace bota a nastavení práv pro čtení zpráv
 intents = discord.Intents.default()
 intents.message_content = True
