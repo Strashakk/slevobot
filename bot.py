@@ -1,8 +1,12 @@
+import os
 import discord
 from discord.ext import commands
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Inicializace bota a nastavení práv pro čtení zpráv
 intents = discord.Intents.default()
@@ -102,3 +106,4 @@ async def rizky(ctx):
         await ctx.send(f"Došlo k chybě při stahování dat: {e}")
 
 # Spuštění bota
+bot.run(os.getenv("DISCORD_TOKEN"))
