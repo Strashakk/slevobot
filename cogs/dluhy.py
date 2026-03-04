@@ -7,6 +7,11 @@ async def setup(bot):
 
 API_URL = "https://flowernal.dev/debt/api/debts?settled=false"
 
+currencies = {
+  "EUR": "€",
+  "CZK": "Kč",
+  "ILS": "₪",
+}
 
 def fetch_debts():
     response = requests.get(API_URL)
@@ -30,7 +35,7 @@ def sum_by_currency(debts):
 
 
 def format_debt(debt):
-    symbol = "€" if debt["currency"] == "EUR" else "Kč"
+    symbol = currencies[debt["currency"]]
     desc = f' ({debt["description"]})' if debt.get("description") else ""
     return f'{debt["person"]}: {debt["amount"]:.2f} {symbol} {desc}'
 
@@ -49,7 +54,7 @@ class Dluhy(commands.Cog):
             zprava += f"🤑 {format_debt(d)}\n"
             
         zprava += "\n"
-        zprava += f"Celkový dluh :\n"
+        zprava += f"Celkový dluh:\n"
         total = sum_by_currency(active)
         for cur, total_amount in total.items():
             zprava += f"🔥✍ {cur}: {total_amount:.2f}\n"
@@ -64,8 +69,10 @@ class Dluhy(commands.Cog):
         zprava = f"### 🧾💐 Flowernalův Celkový dluh:\n"
         total_debt = 0
         for cur, total_amount in total.items():
-            if (cur == "EUR"):
-                total_amount = total_amount * 24.3
+            if cur == "EUR":
+                total_amount *= 24.3
+            elif cur == "ILS":
+                total_amount *= 6.8
             total_debt += total_amount
         
         zprava += f"🔥✍ Celkem: {total_debt:.2f} Kč 💸💸\n"
