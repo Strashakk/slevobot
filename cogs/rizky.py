@@ -69,10 +69,10 @@ class Rizky(commands.Cog):
 
     @staticmethod
     def _build_message(title, emoji, vysledky):
-        zprava = f"{emoji} **{title} - nalezeno {len(vysledky)} akcí:**\n\n"
+        zprava = f"{emoji} **{title} - nalezeno {len(vysledky)} akcí:**\n"
         for i, v in enumerate(vysledky, 1):
             zprava += (
-                f"**{i}. {v['obchod']}**\n"
+                f"**{i}. {v['obchod']}**"
                 f"   💰 Cena: **{v['cena']}** {v['sleva']}\n"
                 f"   📅 Platnost: {v['platnost']}\n\n"
             )
@@ -110,7 +110,7 @@ class Rizky(commands.Cog):
             emoji="🐔",
         )
 
-    @commands.command(name="monster")
+    @commands.command(name="monster", aliases=["monter", "mosnter", "energitak", ])
     async def monster(self, ctx):
         await self._send_discounts(
             ctx,
