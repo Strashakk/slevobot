@@ -34,4 +34,9 @@ async def on_ready():
     print(f'Bot {bot.user} byl úspěšně spuštěn!')
 
 # Spuštění bota
-bot.run(os.getenv("DISCORD_TOKEN"))
+token = os.getenv("DISCORD_TOKEN")
+if not token or not token.strip():
+    print("ERROR: DISCORD_TOKEN není nastavený. Doplň ho do .env souboru.")
+    raise SystemExit(1)
+
+bot.run(token)
