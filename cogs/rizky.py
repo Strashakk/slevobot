@@ -137,7 +137,7 @@ class Rizky(commands.Cog):
             emoji="🐔",
         )
 
-    @app_commands.command(name="rizky", description="Najde slevy na kuřecí prsní řízky")
+    @app_commands.command(name="rizky", description="🐔Najde slevy na kuřecí prsní řízky")
     async def rizky(self, interaction: discord.Interaction):
         await self._send_discounts(
             interaction,
@@ -148,7 +148,7 @@ class Rizky(commands.Cog):
             emoji="🐔",
         )
 
-    @app_commands.command(name="monster", description="Najde slevy na Monster")
+    @app_commands.command(name="monster", description="⚡Najde slevy na energetický nápoj Monster, také známý jako monster nebo monstr")
     async def monster(self, interaction: discord.Interaction):
         await self._send_discounts(
             interaction,
