@@ -110,7 +110,7 @@ class Rizky(commands.Cog):
             emoji="🐔",
         )
 
-    @commands.command(name="monster", aliases=["monter", "mosnter", "energitak", ])
+    @commands.command(name="monster", aliases=["monter", "mosnter", "energitak", "energetak", ])
     async def monster(self, ctx):
         await self._send_discounts(
             ctx,
