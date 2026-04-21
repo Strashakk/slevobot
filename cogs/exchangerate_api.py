@@ -30,6 +30,15 @@ class ExchangeRateAPI:
             return None
         return matches[0]
 
+    def get_normalized_rate(self, target_code):
+        item = self.get_currency_rate(target_code)
+        if not item:
+            return None
+        rate = item.get("rate", 0)
+        amount = item.get("amount", 1)
+        if not amount:
+            return None
+        return rate / amount
 
 if __name__ == "__main__":
     api = ExchangeRateAPI()
@@ -37,8 +46,5 @@ if __name__ == "__main__":
     target_code = "TRY"
     """Placeholder for testing, intended as /dluhy argument in the future"""
     
-    found = api.find_currency(target_code)
-    for item in found:
-        # print(item.get("currencyCode"), item.get("rate"), item.get("country"))
-        normalized_rate = item.get("rate", 0) / item.get("amount", 1)
-        print(f"Normalized rate: {normalized_rate}")
+    normalized_rate = api.get_normalized_rate(target_code)
+    print(f"Normalized rate: {normalized_rate}")
