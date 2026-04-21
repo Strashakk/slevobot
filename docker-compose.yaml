@@ -1,0 +1,8 @@
+services:
+  app:
+    build: .
+    # Get .env file with token
+    env_file:
+      - .env
+    # Restart on crash
+    restart: always
