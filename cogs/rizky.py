@@ -8,15 +8,15 @@ from datetime import datetime
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
 
 
-async def setup(bot):
+async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(Rizky(bot))
 
 
 class Rizky(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
 
-    def _scrape_discounts(self, url):
+    def _scrape_discounts(self, url: str | bytes) -> list[dict[str, str]]:
         headers = {"User-Agent": USER_AGENT}
         response = requests.get(url, headers=headers, timeout=15)
         response.raise_for_status()
@@ -38,6 +38,8 @@ class Rizky(commands.Cog):
             if shop_span:
                 link = shop_span.find("a", class_="product_link_history")
                 if link:
+                    # get() can return "None" here
+                    # Maybe add a check here?
                     nazev = link.get("title", "").strip()
 
             price_tag = row.find("strong", class_="discount_price_value")
@@ -73,7 +75,7 @@ class Rizky(commands.Cog):
         return vysledky
 
     @staticmethod
-    def _build_message(title, emoji, vysledky):
+    def _build_message(title: str, emoji: str, vysledky: list[dict[str, str]]) -> str:
         zprava = f"{emoji} **{title} - nalezeno {len(vysledky)} akcí:**\n"
         for i, v in enumerate(vysledky, 1):
             zprava += (
@@ -84,10 +86,10 @@ class Rizky(commands.Cog):
         return zprava
 
     @staticmethod
-    def _chunk_text(text, max_len=1990):
+    def _chunk_text(text: str, max_len: int =1990) -> list[str]:
         return [text[i: i + max_len] for i in range(0, len(text), max_len)]
 
-    async def _send_discounts(self, interaction, *, title, empty_text, error_text, url, emoji):
+    async def _send_discounts(self, interaction: discord.Interaction, *, title: str, empty_text: str, error_text: str, url: str, emoji: str) -> None:
         try:
             vysledky = self._scrape_discounts(url)
             if not vysledky:
@@ -109,7 +111,7 @@ class Rizky(commands.Cog):
             else:
                 await interaction.response.send_message(f"{error_text}: {e}")
 
-    async def _send_discounts_ctx(self, ctx, *, title, empty_text, error_text, url, emoji):
+    async def _send_discounts_ctx(self, ctx: commands.Context, *, title: str, empty_text: str, error_text: str, url: str, emoji: str) -> None:
         try:
             vysledky = self._scrape_discounts(url)
             if not vysledky:
@@ -127,7 +129,7 @@ class Rizky(commands.Cog):
             await ctx.send(f"{error_text}: {e}")
 
     @commands.command(name="rizky")
-    async def rizky_text(self, ctx):
+    async def rizky_text(self, ctx: commands.Context) -> None:
         await self._send_discounts_ctx(
             ctx,
             title="Kuřecí prsní řízky",
@@ -138,7 +140,7 @@ class Rizky(commands.Cog):
         )
 
     @app_commands.command(name="rizky", description="🐔Najde slevy na kuřecí prsní řízky")
-    async def rizky(self, interaction: discord.Interaction):
+    async def rizky(self, interaction: discord.Interaction) -> None:
         await self._send_discounts(
             interaction,
             title="Kuřecí prsní řízky",
@@ -149,7 +151,7 @@ class Rizky(commands.Cog):
         )
 
     @app_commands.command(name="monster", description="⚡Najde slevy na energetický nápoj Monster, také známý jako monster nebo monstr")
-    async def monster(self, interaction: discord.Interaction):
+    async def monster(self, interaction: discord.Interaction) -> None:
         await self._send_discounts(
             interaction,
             title="Monster",

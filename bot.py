@@ -12,7 +12,7 @@ intents.message_content = True
 
 
 class Slevobot(commands.Bot):
-    async def setup_hook(self):
+    async def setup_hook(self) -> None:
         await self.load_extension('cogs.dluhy')
         await self.load_extension('cogs.rizky')
         guild_id = os.getenv("DISCORD_GUILD_ID")
@@ -30,7 +30,7 @@ bot = Slevobot(command_prefix=commands.when_mentioned_or('!'), intents=intents)
 
 
 @bot.event
-async def on_ready():
+async def on_ready() -> None:
     print(f'Bot {bot.user} byl úspěšně spuštěn!')
 
 # Spuštění bota
