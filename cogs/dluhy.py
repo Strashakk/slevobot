@@ -48,7 +48,7 @@ class Dluhy(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @app_commands.command(name="dluhy", description="Vypíše aktivní dluhy")
+    @app_commands.command(name="dluhy", description="💸Vypíše aktivní dluhy")
     async def dluhy(self, interaction: discord.Interaction):
         debts = fetch_debts()
         active = filter_active(debts)
@@ -65,7 +65,7 @@ class Dluhy(commands.Cog):
 
         await interaction.response.send_message(zprava)
 
-    @app_commands.command(name="dluhycelkem", description="Spočítá celkový dluh v Kč")
+    @app_commands.command(name="dluhycelkem", description="💰Spočítá celkový dluh v Kč")
     async def dluhycelkem(self, interaction: discord.Interaction):
         debts = fetch_debts()
         active = filter_active(debts)
