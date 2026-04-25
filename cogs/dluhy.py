@@ -2,9 +2,11 @@ import requests
 import discord
 from discord import app_commands
 from discord.ext import commands
-from typing import TypedDict
+from typing import TypedDict, Literal
 
 # Structure of a debt record
+
+
 class Debt(TypedDict):
     id: int
     person: str
@@ -27,6 +29,24 @@ currencies = {
     "CZK": "Kč",
     "ILS": "₪",
 }
+
+RANGE_TYPE = Literal["weekly", "monthly", "3months", "6months", "1year"]
+
+
+class GraphResponse(TypedDict):
+    range: Literal["weekly", "monthly", "3months", "6months", "1year"]
+    image_url: str
+    image_path: str
+    points_used: int
+
+
+GRAPH_API_PATH = "https://flowernal.dev/debt/api/v2/graphs/debt-total?range={}"
+
+
+def fetch_graph(window: str = "monthly") -> GraphResponse:
+    response = requests.get(f"{GRAPH_API_PATH.format(window)}", timeout=15)
+    response.raise_for_status()
+    return response.json()
 
 
 def fetch_debts() -> list[Debt]:
@@ -61,7 +81,9 @@ class Dluhy(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
 
-    @app_commands.command(name="dluhy", description="💸Vypíše aktivní dluhy")
+    dluhy_group = app_commands.Group(name="dluhy",description="Příkazy související s dluhy")
+
+    @dluhy_group.command(name="seznam", description="💸Vypíše aktivní dluhy")
     async def dluhy(self, interaction: discord.Interaction) -> None:
         debts = fetch_debts()
         active = filter_active(debts)
@@ -78,7 +100,7 @@ class Dluhy(commands.Cog):
 
         await interaction.response.send_message(zprava)
 
-    @app_commands.command(name="dluhycelkem", description="💰Spočítá celkový dluh v Kč")
+    @dluhy_group.command(name="celkem", description="💰Spočítá celkový dluh v Kč")
     async def dluhycelkem(self, interaction: discord.Interaction) -> None:
         debts = fetch_debts()
         active = filter_active(debts)
@@ -95,3 +117,27 @@ class Dluhy(commands.Cog):
         zprava += f"🔥✍ Celkem: {total_debt:.2f} Kč 💸💸\n"
 
         await interaction.response.send_message(zprava)
+
+    @dluhy_group.command(name="graf", description="📉 Zobrazí graf dluhů (výchozí je měsíc)")
+    @app_commands.describe(time="⏱️ Vyberte časové období pro graf")
+    async def dluhygraf(self, interaction: discord.Interaction,
+                        time: RANGE_TYPE = "monthly") -> None:
+        await interaction.response.defer()
+
+        try:
+            graph = fetch_graph(time)
+
+            image_url = graph.get("image_url")
+            if not image_url:
+                await interaction.followup.send("No image found in API response.", ephemeral=True)
+                return
+
+            embed = discord.Embed(title="Debt History",
+                                  color=discord.Color.blue())
+            embed.set_image(url=image_url)
+            embed.set_footer(text=f"Range: {graph.get('range')}")
+
+            await interaction.followup.send(embed=embed)
+
+        except requests.RequestException as e:
+            await interaction.followup.send(f"Failed to fetch graph: {e}", ephemeral=True)
