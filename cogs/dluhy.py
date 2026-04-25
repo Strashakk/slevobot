@@ -2,9 +2,22 @@ import requests
 import discord
 from discord import app_commands
 from discord.ext import commands
+from typing import TypedDict
+
+# Structure of a debt record
+class Debt(TypedDict):
+    id: int
+    person: str
+    amount: float | int
+    currency: str
+    description: str
+    direction: str
+    settled: int
+    created_at: str
+    updated_at: str
 
 
-async def setup(bot):
+async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(Dluhy(bot))
 
 API_URL = "https://flowernal.dev/debt/api/debts?settled=false"
@@ -16,21 +29,21 @@ currencies = {
 }
 
 
-def fetch_debts():
+def fetch_debts() -> list[Debt]:
     response = requests.get(API_URL)
     response.raise_for_status()
     return response.json()
 
 
-def filter_active(debts):
+def filter_active(debts: list[Debt]) -> list[Debt]:
     return [d for d in debts if d["settled"] == 0]
 
 
-def filter_by_direction(debts, direction):
+def filter_by_direction(debts: list[Debt], direction: str) -> list[Debt]:
     return [d for d in debts if d["direction"] == direction]
 
 
-def sum_by_currency(debts):
+def sum_by_currency(debts: list[Debt]) -> dict[str, float | int]:
     totals = {}
     for d in debts:
         cur = d["currency"]
@@ -38,18 +51,18 @@ def sum_by_currency(debts):
     return totals
 
 
-def format_debt(debt):
+def format_debt(debt: Debt) -> str:
     symbol = currencies[debt["currency"]]
     desc = f' ({debt["description"]})' if debt.get("description") else ""
     return f'{debt["person"]}: {debt["amount"]:.2f} {symbol} {desc}'
 
 
 class Dluhy(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
 
     @app_commands.command(name="dluhy", description="💸Vypíše aktivní dluhy")
-    async def dluhy(self, interaction: discord.Interaction):
+    async def dluhy(self, interaction: discord.Interaction) -> None:
         debts = fetch_debts()
         active = filter_active(debts)
 
@@ -66,7 +79,7 @@ class Dluhy(commands.Cog):
         await interaction.response.send_message(zprava)
 
     @app_commands.command(name="dluhycelkem", description="💰Spočítá celkový dluh v Kč")
-    async def dluhycelkem(self, interaction: discord.Interaction):
+    async def dluhycelkem(self, interaction: discord.Interaction) -> None:
         debts = fetch_debts()
         active = filter_active(debts)
         total = sum_by_currency(active)
