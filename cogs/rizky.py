@@ -38,8 +38,6 @@ class Rizky(commands.Cog):
             if shop_span:
                 link = shop_span.find("a", class_="product_link_history")
                 if link:
-                    # get() can return "None" here
-                    # Maybe add a check here?
                     nazev = link.get("title", "").strip()
 
             price_tag = row.find("strong", class_="discount_price_value")
