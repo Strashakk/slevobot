@@ -21,13 +21,13 @@ def fetch_graph(window: str = "monthly") -> GraphResponse:
     return response.json()
 
 class DluhyGraph(commands.Cog):
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
 
     @app_commands.command(name="dluhy graf", description="📉Zobrazí graf dlhov (predvolene mesiac)")
     @app_commands.describe(time="⏱️Vyberte časové rozpätie pre graf")
-    async def dluhygraf(self, interaction: discord.Interaction, 
-                        time: RANGE_TYPE = "monthly"):
+    async def dluhygraf(self, interaction: discord.Interaction,
+                        time: RANGE_TYPE = "monthly") -> None:
         await interaction.response.defer()
 
         try:
@@ -47,5 +47,5 @@ class DluhyGraph(commands.Cog):
         except requests.RequestException as e:
             await interaction.followup.send(f"Failed to fetch graph: {e}", ephemeral=True)
 
-async def setup(bot: commands.Bot):
+async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(DluhyGraph(bot))
