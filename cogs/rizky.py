@@ -63,7 +63,7 @@ class Rizky(commands.Cog):
                 den_tydne = dny_v_tydnu[ted.weekday()]
                 platnost = f"končí dnes {den_tydne} {ted.day}. {ted.month}."
 
-            ## Skip discounts whose end date is already in the past
+            ## Skip vysledek if sleva already neexistuje
             date_matches = re.findall(r"(\d{1,2})\.\s*(\d{1,2})\.(?:\s*(\d{4}))?", platnost)
             if date_matches:
                 # Use the last date in the string as the end date (covers ranges like "1. 5. – 7. 5.")
