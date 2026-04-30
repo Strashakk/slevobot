@@ -15,6 +15,7 @@ class Slevobot(commands.Bot):
     async def setup_hook(self) -> None:
         await self.load_extension('cogs.dluhy')
         await self.load_extension('cogs.rizky')
+        await self.load_extension('cogs.socials')
         guild_id = os.getenv("DISCORD_GUILD_ID")
         if guild_id:
             guild = discord.Object(id=int(guild_id))
