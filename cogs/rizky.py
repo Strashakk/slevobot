@@ -85,29 +85,26 @@ class Rizky(commands.Cog):
 
     @staticmethod
     def _chunk_text(text: str, max_len: int =1990) -> list[str]:
-        return [text[i: i + max_len] for i in range(0, len(text), max_len)]
+        if text:
+            return [text[i:i+max_len] for i in range(0, len(text), 1990)]
+        else:
+            return [""]
 
     async def _send_discounts(self, interaction: discord.Interaction, *, title: str, empty_text: str, error_text: str, url: str, emoji: str) -> None:
+        meowssage = empty_text
         try:
             vysledky = self._scrape_discounts(url)
-            if not vysledky:
-                await interaction.response.send_message(empty_text)
-                return
+            if vysledky:
+                meowssage = self._build_message(title, emoji, vysledky)
 
-            zprava = self._build_message(title, emoji, vysledky)
-            if len(zprava) <= 2000:
-                await interaction.response.send_message(zprava)
-                return
+        except (requests.RequestException, ValueError, TypeError, AttributeError) as e:
+            meowssage = f"{error_text}: {e}"
 
-            chunks = self._chunk_text(zprava)
+        chunks = self._chunk_text(meowssage)
+        if chunks:
             await interaction.response.send_message(chunks[0])
             for cast in chunks[1:]:
                 await interaction.followup.send(cast)
-        except (requests.RequestException, ValueError, TypeError, AttributeError) as e:
-            if interaction.response.is_done():
-                await interaction.followup.send(f"{error_text}: {e}")
-            else:
-                await interaction.response.send_message(f"{error_text}: {e}")
 
     async def _send_discounts_ctx(self, ctx: commands.Context, *, title: str, empty_text: str, error_text: str, url: str, emoji: str) -> None:
         try:
