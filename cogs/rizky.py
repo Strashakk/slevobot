@@ -59,9 +59,11 @@ class Rizky(commands.Cog):
 
             if "dnes končí" in platnost.lower():
                 dny_v_tydnu = ["pondělí", "úterý", "středy", "čtvrtku", "pátku", "soboty", "neděle"]
-                den_tydne = dny_v_tydnu[datetime.now().weekday()]
-                dnes = datetime.now().strftime(f"{den_tydne} %-d. %-m.")
-                platnost = f"končí dnes ({dnes})"
+                ted = datetime.now()
+                den_tydne = dny_v_tydnu[ted.weekday()]
+                den = ted.day.lstrip('0')
+                mesic = ted.month.lstrip('0')
+                platnost = f"končí dnes {den_tydne} {den}. {mesic}."
 
             ## Skip vysledek if sleva already neexistuje
             match = re.search(r"(\d+)\.\s*(\d+)\.", platnost)                                    
