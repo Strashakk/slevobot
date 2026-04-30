@@ -68,23 +68,23 @@ def construct_diff_message(diff_response: DiffResponse) -> str:
             msg += " za týden\n"
         case "monthly":
             msg += " za měsíc\n"
-    msg += f"⏪ Dluh původně: {diff_response['previous']}\n"
-    msg += f"⚡ Dluh nyní: {diff_response['current']}\n"
+    msg += f"⏪ Dluh původně: {diff_response['previous']}{currencies['EUR']}\n"
+    msg += f"⚡ Dluh nyní: {diff_response['current']}{currencies['EUR']}\n"
     debt_delta = float(diff_response["change"])
     msg += "Změna: "
     if int(debt_delta) == 0:
         msg += "beze změny"
         return msg
     elif debt_delta > 0:
-        msg += f"nárůst o {debt_delta}{currencies['EUR']}\n"
+        msg += f"📈 nárůst o {debt_delta}{currencies['EUR']}\n"
     else:
-        msg += f"pokles o {abs(debt_delta)}{currencies['EUR']}\n"
+        msg += f"📉 pokles o {abs(debt_delta)}{currencies['EUR']}\n"
     msg += "Změna (v procentech): "
     debt_delta_percent = float(diff_response["change_percent"])
     if debt_delta_percent > 0:
-        msg += f"nárůst o {debt_delta_percent}%"
+        msg += f"📈 nárůst o {debt_delta_percent}%"
     else:
-        msg += f"pokles o {abs(debt_delta_percent)}%"  
+        msg += f"📉 pokles o {abs(debt_delta_percent)}%"  
     return msg
 
 def fetch_graph(window: str = "monthly") -> GraphResponse:
