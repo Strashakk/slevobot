@@ -3,7 +3,6 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 from typing import TypedDict, Literal
-from dataclasses import dataclass
 from babel.numbers import format_currency
 
 
