@@ -61,18 +61,28 @@ class Rizky(commands.Cog):
                 dny_v_tydnu = ["pondělí", "úterý", "středy", "čtvrtku", "pátku", "soboty", "neděle"]
                 ted = datetime.now()
                 den_tydne = dny_v_tydnu[ted.weekday()]
-                den = ted.day.lstrip('0')
-                mesic = ted.month.lstrip('0')
-                platnost = f"končí dnes {den_tydne} {den}. {mesic}."
+                platnost = f"končí dnes {den_tydne} {ted.day}. {ted.month}."
 
-            ## Skip vysledek if sleva already neexistuje
-            match = re.search(r"(\d+)\.\s*(\d+)\.", platnost)                                    
-            if match:
-                day = int(match.group(1))
-                month = int(match.group(2))
-                year = datetime.now().year
-                dt = datetime(year, month, day)
-                if dt.date() < datetime.now().date():
+            ## Skip discounts whose end date is already in the past
+            date_matches = re.findall(r"(\d{1,2})\.\s*(\d{1,2})\.(?:\s*(\d{4}))?", platnost)
+            if date_matches:
+                # Use the last date in the string as the end date (covers ranges like "1. 5. – 7. 5.")
+                day_str, month_str, year_str = date_matches[-1]
+                day = int(day_str)
+                month = int(month_str)
+                today = datetime.now().date()
+                if year_str:
+                    year = int(year_str)
+                else:
+                    year = today.year
+                    # Year rollover: date like "2. 1." seen in Q4 belongs to next year
+                    if today.month >= 10 and month <= 3:
+                        year += 1
+                try:
+                    end_date = datetime(year, month, day).date()
+                except ValueError:
+                    end_date = None
+                if end_date is not None and end_date < today:
                     continue
 
             vysledky.append(
