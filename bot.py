@@ -15,15 +15,7 @@ class Slevobot(commands.Bot):
     async def setup_hook(self) -> None:
         await self.load_extension('cogs.dluhy')
         await self.load_extension('cogs.rizky')
-        guild_id = os.getenv("DISCORD_GUILD_ID")
-        if guild_id:
-            guild = discord.Object(id=int(guild_id))
-            self.tree.clear_commands(guild=guild)
-            self.tree.copy_global_to(guild=guild)
-            await self.tree.sync(guild=guild)
-        else:
-            self.tree.clear_commands(guild=None)
-            await self.tree.sync()
+        await self.load_extension('cogs.sync')
 
 
 bot = Slevobot(command_prefix=commands.when_mentioned_or('!'), intents=intents)
