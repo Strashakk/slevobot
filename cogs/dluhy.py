@@ -3,6 +3,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 from typing import TypedDict, Literal
+from dataclasses import dataclass
 
 # Structure of a debt record
 
@@ -32,6 +33,7 @@ currencies = {
 
 RANGE_TYPE = Literal["weekly", "monthly", "3months", "6months", "1year"]
 
+HORIZON_TYPE = Literal["daily", "weekly", "monthly"]
 
 class GraphResponse(TypedDict):
     range: Literal["weekly", "monthly", "3months", "6months", "1year"]
@@ -39,9 +41,51 @@ class GraphResponse(TypedDict):
     image_path: str
     points_used: int
 
+@dataclass
+class DiffResponse(TypedDict):
+    current: float
+    previous: float
+    change: float
+    change_percent: float
+    horizon: HORIZON_TYPE
 
 GRAPH_API_PATH = "https://flowernal.dev/debt/api/v2/graphs/debt-total?range={}"
 
+DIFF_API_PATH = "https://flowernal.dev/debt/api/v2/debt-diff?horizon={}"
+
+def fetch_diff(horizon: str = "daily") -> DiffResponse:
+    response = requests.get(f"{DIFF_API_PATH.format(horizon)}", timeout=15)
+    response.raise_for_status()
+    return response.json()
+
+def construct_diff_message(diff_response: DiffResponse) -> str:
+    msg = "### 📈📉💸 změna ve Flowernalových dluzích"
+    horizon = diff_response["horizon"] 
+    match horizon:
+        case "daily":
+            msg += " za den\n"
+        case "weekly":
+            msg += " za týden\n"
+        case "monthly":
+            msg += " za měsíc\n"
+    msg += f"⏪ Dluh původně: {diff_response['previous']}{currencies['EUR']}\n"
+    msg += f"⚡ Dluh nyní: {diff_response['current']}{currencies['EUR']}\n"
+    debt_delta = float(diff_response["change"])
+    msg += "Změna: "
+    if int(debt_delta) == 0:
+        msg += "beze změny"
+        return msg
+    elif debt_delta > 0:
+        msg += f"📈 nárůst o {debt_delta}{currencies['EUR']}\n"
+    else:
+        msg += f"📉 pokles o {abs(debt_delta)}{currencies['EUR']}\n"
+    msg += "Změna (v procentech): "
+    debt_delta_percent = float(diff_response["change_percent"])
+    if debt_delta_percent > 0:
+        msg += f"📈 nárůst o {debt_delta_percent}%"
+    else:
+        msg += f"📉 pokles o {abs(debt_delta_percent)}%"  
+    return msg
 
 def fetch_graph(window: str = "monthly") -> GraphResponse:
     response = requests.get(f"{GRAPH_API_PATH.format(window)}", timeout=15)
@@ -141,3 +185,28 @@ class Dluhy(commands.Cog):
 
         except requests.RequestException as e:
             await interaction.followup.send(f"Failed to fetch graph: {e}", ephemeral=True)
+    @dluhy_group.command(name="zmena", description="📈📉 Zobrazí změnu výšky dluhů za dané období (výchozí je den)")
+    @app_commands.describe(horizon="⏱️ Vyberte časové období pro graf")
+    async def dluhyzmena(self, interaction: discord.Interaction,
+                         horizon: HORIZON_TYPE = "daily") -> None:
+        try:
+            diff_response = DiffResponse(**fetch_diff(horizon))
+            reply_msg = construct_diff_message(diff_response)
+            await interaction.response.send_message(reply_msg)
+
+        except requests.RequestException as e:
+            await interaction.followup.send(
+                f"Failed to fetch diff: {e}",
+                ephemeral=True
+            )
+        except TypeError as e:
+            await interaction.followup.send(
+                f"Received unexpected API response: {e}",
+                ephemeral=True
+            )
+        except ValueError as e:
+            await interaction.followup.send(
+                f"There was an error when creating the response: {e}",
+                ephemeral=True
+            )
+
