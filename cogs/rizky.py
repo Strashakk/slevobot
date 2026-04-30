@@ -4,9 +4,9 @@ from discord import app_commands
 from discord.ext import commands
 from bs4 import BeautifulSoup
 from datetime import datetime
+import re
 
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-
 
 async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(Rizky(bot))
@@ -58,8 +58,20 @@ class Rizky(commands.Cog):
                     strip=True).replace("\xa0", " ")
 
             if "dnes končí" in platnost.lower():
-                dnes = datetime.now().strftime("%d. %m. %Y")
+                dny_v_tydnu = ["pondělí", "úterý", "středy", "čtvrtku", "pátku", "soboty", "neděle"]
+                den_tydne = dny_v_tydnu[datetime.now().weekday()]
+                dnes = datetime.now().strftime(f"{den_tydne} %-d. %-m.")
                 platnost = f"končí dnes ({dnes})"
+
+            ## Skip vysledek if sleva already neexistuje
+            match = re.search(r"(\d+)\.\s*(\d+)\.", platnost)                                    
+            if match:
+                day = int(match.group(1))
+                month = int(match.group(2))
+                year = datetime.now().year
+                dt = datetime(year, month, day)
+                if dt.date() < datetime.now().date():
+                    continue
 
             vysledky.append(
                 {
