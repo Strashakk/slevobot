@@ -17,6 +17,7 @@ def mock_interaction():
     """Create a mocked Discord interaction."""
     interaction = MagicMock()
     interaction.response = AsyncMock()
+    interaction.response.is_done = False
     interaction.followup = AsyncMock()
     return interaction
 
