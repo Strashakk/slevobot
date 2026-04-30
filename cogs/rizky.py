@@ -71,18 +71,19 @@ class Rizky(commands.Cog):
                 day = int(day_str)
                 month = int(month_str)
                 today = datetime.now().date()
-                if year_str:
-                    year = int(year_str)
-                else:
-                    year = today.year
-                    # Year rollover: date like "2. 1." seen in Q4 belongs to next year
-                    if today.month >= 10 and month <= 3:
-                        year += 1
+                year = int(year_str) if year_str else today.year
                 try:
                     end_date = datetime(year, month, day).date()
                 except ValueError:
-                    end_date = None
-                if end_date is not None and end_date < today:
+                    continue
+                # Year rollover: if the date appears expired and we're in Q4 while the
+                # date is in Q1, it likely belongs to next year (e.g. "2. 1." in December)
+                if not year_str and end_date < today and today.month >= 10 and month <= 3:
+                    try:
+                        end_date = datetime(year + 1, month, day).date()
+                    except ValueError:
+                        continue
+                if end_date < today:
                     continue
 
             vysledky.append(
