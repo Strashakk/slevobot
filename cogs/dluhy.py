@@ -23,7 +23,7 @@ class Debt(TypedDict):
 async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(Dluhy(bot))
 
-API_URL = "https://flowernal.dev/debt/api/debts?settled=false"
+DEBT_API_URL = "https://flowernal.dev/debt/api/v2/debts?settled=false"
 
 currencies = {
     "EUR": "€",
@@ -48,6 +48,13 @@ class DiffResponse(TypedDict):
     change: float
     change_percent: float
     horizon: HORIZON_TYPE
+
+class DebtResponse(TypedDict):
+    debts: list[Debt]
+    debt_totals_by_currency: dict[str,int]
+    debt_total_eur: float
+    conversion: dict[str,int]
+    currency_format: str
 
 GRAPH_API_PATH = "https://flowernal.dev/debt/api/v2/graphs/debt-total?range={}"
 
@@ -93,14 +100,14 @@ def fetch_graph(window: str = "monthly") -> GraphResponse:
     return response.json()
 
 
-def fetch_debts() -> list[Debt]:
-    response = requests.get(API_URL)
+def fetch_debts() -> DebtResponse:
+    response = requests.get(DEBT_API_URL,timeout=15)
     response.raise_for_status()
     return response.json()
 
 
-def filter_active(debts: list[Debt]) -> list[Debt]:
-    return [d for d in debts if d["settled"] == 0]
+def filter_active(debts: DebtResponse) -> list[Debt]:
+    return [d for d in debts["debts"] if d["settled"] == 0]
 
 
 def filter_by_direction(debts: list[Debt], direction: str) -> list[Debt]:
