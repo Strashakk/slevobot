@@ -1,6 +1,7 @@
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 import requests
+from datetime import datetime, timedelta
 
 from cogs.rizky import Rizky
 
@@ -414,7 +415,8 @@ class TestScrapeDiscounts:
 
     def test_scrape_discounts_nbsp_replacement(self, rizky_cog):
         """Test that non-breaking spaces are replaced with regular spaces."""
-        html = """
+        future_date = datetime.now() + timedelta(weeks=1)
+        html = f"""
         <html>
             <div class="discount_row" id="d1">
                 <span class="discounts_shop_name">
@@ -422,7 +424,7 @@ class TestScrapeDiscounts:
                 </span>
                 <strong class="discount_price_value">100&nbsp;Kč</strong>
                 <div class="discount_percentage">-20&nbsp;%</div>
-                <div class="discounts_validity">do&nbsp;30.&nbsp;4.&nbsp;2026</div>
+                <div class="discounts_validity">do&nbsp;{future_date.day}.&nbsp;{future_date.month}.&nbsp;{future_date.year}</div>
             </div>
         </html>
         """
