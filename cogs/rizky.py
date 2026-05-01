@@ -58,10 +58,8 @@ class Rizky(commands.Cog):
                     strip=True).replace("\xa0", " ")
 
             if "dnes končí" in platnost.lower():
-                dny_v_tydnu = ["pondělí", "úterý", "středy", "čtvrtku", "pátku", "soboty", "neděle"]
                 ted = datetime.now()
-                den_tydne = dny_v_tydnu[ted.weekday()]
-                platnost = f"končí dnes {den_tydne} {ted.day}. {ted.month}."
+                platnost = f"končí dnes {ted.day}. {ted.month}."
 
             ## Skip vysledek if sleva already neexistuje
             date_matches = re.findall(r"(\d{1,2})\.\s*(\d{1,2})\.(?:\s*(\d{4}))?", platnost)
