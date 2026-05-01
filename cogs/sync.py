@@ -21,6 +21,10 @@ class Sync(commands.Cog):
             guild = discord.Object(id=int(guild_id)) if guild_id else None
             if guild:
                 self.bot.tree.copy_global_to(guild=guild)
+
+            for cmd in self.bot.extensions.keys():
+                await self.bot.reload_extension(cmd)
+
             synced = await self.bot.tree.sync(guild=guild)
             synced_str = "".join([f"- {command.name}\n" for command in synced])
             await ctx.reply(f"Successfully synced {len(synced)} command{"s" if len(synced) != 1 else ""} {f"in guild {guild_id}" if guild_id else "globally"}.\n{synced_str}")
