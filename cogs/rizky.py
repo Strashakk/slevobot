@@ -4,9 +4,9 @@ from discord import app_commands
 from discord.ext import commands
 from bs4 import BeautifulSoup
 from datetime import datetime
+import re
 
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-
 
 async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(Rizky(bot))
@@ -58,8 +58,31 @@ class Rizky(commands.Cog):
                     strip=True).replace("\xa0", " ")
 
             if "dnes končí" in platnost.lower():
-                dnes = datetime.now().strftime("%d. %m. %Y")
-                platnost = f"končí dnes ({dnes})"
+                ted = datetime.now()
+                platnost = f"končí dnes {ted.day}. {ted.month}."
+
+            ## Skip vysledek if sleva already neexistuje
+            date_matches = re.findall(r"(\d{1,2})\.\s*(\d{1,2})\.(?:\s*(\d{4}))?", platnost)
+            if date_matches:
+                # Use the last date in the string as the end date (covers ranges like "1. 5. – 7. 5.")
+                day_str, month_str, year_str = date_matches[-1]
+                day = int(day_str)
+                month = int(month_str)
+                today = datetime.now().date()
+                year = int(year_str) if year_str else today.year
+                try:
+                    end_date = datetime(year, month, day).date()
+                except ValueError:
+                    continue
+                # Year rollover: if the date appears expired and we're in Q4 while the
+                # date is in Q1, it likely belongs to next year (e.g. "2. 1." in December)
+                if not year_str and end_date < today and today.month >= 10 and month <= 3:
+                    try:
+                        end_date = datetime(year + 1, month, day).date()
+                    except ValueError:
+                        continue
+                if end_date < today:
+                    continue
 
             vysledky.append(
                 {
