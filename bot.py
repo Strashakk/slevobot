@@ -16,6 +16,7 @@ class Slevobot(commands.Bot):
         await self.load_extension('cogs.dluhy')
         await self.load_extension('cogs.rizky')
         await self.load_extension('cogs.sync')
+        await self.load_extension('cogs.lockin')
 
 
 bot = Slevobot(command_prefix=commands.when_mentioned_or('!'), intents=intents)
