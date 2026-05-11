@@ -2,8 +2,7 @@ import requests
 import discord
 from discord import app_commands
 from discord.ext import commands
-from bs4 import BeautifulSoup
-from datetime import datetime
+from lib.scraper import Scraper, ScrapedProducts
 import re
 
 
@@ -14,29 +13,33 @@ async def setup(bot: commands.Bot) -> None:
 class Akce(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
+        self.scraper = Scraper("Brno")
 
     @staticmethod
-    def _build_message(title: str, emoji: str, vysledky: list[dict[str, str]]) -> str:
-        zprava = f"{emoji} **{title} - nalezeno {len(vysledky)} akcí:**\n"
+    def _build_message(title: str, emoji: str, vysledky: ScrapedProducts) -> str:
+        zprava = f"{emoji} **{title} - {"nalezeno" if len(vysledky) != 1 else "nalezena"} {len(vysledky)} {"akcí" if len(vysledky) != 1 else "akce"}:**\n"
         for i, v in enumerate(vysledky, 1):
             zprava += (
-                f"**{i}. {v['obchod']}**"
+                f"**{i}. {v['nazev']}**"
                 f"   💰 Cena: **{v['cena']}** {v['sleva']}\n"
                 f"   📅 Platnost: {v['platnost']}\n\n"
             )
         return zprava
 
     @staticmethod
-    def _chunk_text(text: str, max_len: int =1990) -> list[str]:
+    def _chunk_text(text: str, max_len: int = 1990) -> list[str]:
         if text:
             return [text[i:i+max_len] for i in range(0, len(text), 1990)]
         else:
             return [""]
 
-    async def _send_discounts(self, interaction: discord.Interaction, *, title: str, empty_text: str, error_text: str, name: str, emoji: str) -> None:
+    async def _send_discounts(self, interaction: discord.Interaction, *, title: str, empty_text: str, error_text: str, url: str, emoji: str, filter_: str | None = None, whitelist: bool = True) -> None:
         meowssage = empty_text
         try:
-            vysledky = self._scrape_discounts(name)
+            vysledky = self.scraper.scrape(url)
+            if filter_:
+                vysledky = list(
+                    filter(lambda x: whitelist if re.search(filter_, x["nazev"]) is not None else not whitelist, vysledky))
             if vysledky:
                 meowssage = self._build_message(title, emoji, vysledky)
 
@@ -49,9 +52,12 @@ class Akce(commands.Cog):
             for cast in chunks[1:]:
                 await interaction.followup.send(cast)
 
-    async def _send_discounts_ctx(self, ctx: commands.Context, *, title: str, empty_text: str, error_text: str, name: str, emoji: str) -> None:
+    async def _send_discounts_ctx(self, ctx: commands.Context, *, title: str, empty_text: str, error_text: str, url: str, emoji: str, filter_: str | None = None, whitelist: bool = True) -> None:
         try:
-            vysledky = self._scrape_discounts(name)
+            vysledky = self.scraper.scrape(url)
+            if filter_:
+                vysledky = list(
+                    filter(lambda x: whitelist if re.search(filter_, x["nazev"]) is not None else not whitelist, vysledky))
             if not vysledky:
                 await ctx.send(empty_text)
                 return
@@ -73,7 +79,7 @@ class Akce(commands.Cog):
             title="Kuřecí prsní řízky",
             empty_text="Nebyly nalezeny žádné akce na kuřecí prsní řízky.",
             error_text="Došlo k chybě při stahování akcí na kuřecí prsní řízky",
-            name="kureci-prsni-rizky",
+            url="https://www.kupi.cz/sleva/kureci-prsni-rizky/",
             emoji="🐔",
         )
 
@@ -84,7 +90,7 @@ class Akce(commands.Cog):
             title="Kuřecí prsní řízky",
             empty_text="Nebyly nalezeny žádné akce na kuřecí prsní řízky.",
             error_text="Došlo k chybě při stahování akcí na kuřecí prsní řízky",
-            name="kureci-prsni-rizky",
+            url="https://www.kupi.cz/sleva/kureci-prsni-rizky/",
             emoji="🐔",
         )
 
@@ -95,6 +101,29 @@ class Akce(commands.Cog):
             title="Monster",
             empty_text="Nebyly nalezeny žádné akce na Monster.",
             error_text="Došlo k chybě při stahování akcí na Monster",
-            name="energeticky-napoj-monster-energy",
+            url="https://www.kupi.cz/sleva/energeticky-napoj-monster-energy/",
             emoji="⚡",
+        )
+
+    @app_commands.command(name="vejce", description="🥚Najde slevy na vejce v velikosti M/L")
+    async def vejce(self, interaction: discord.Interaction) -> None:
+        await self._send_discounts(
+            interaction,
+            title="Vejce",
+            empty_text="Nebyly nalezeny žádné akce na Vejce",
+            error_text="Došlo k chybě při stahování akcí na Vejce",
+            url="https://www.kupi.cz/slevy/vejce-a-drozdi/",
+            emoji="🥚",
+            filter_=r"Vejce.*\b(?:M|L)\b"
+        )
+
+    @app_commands.command(name="mlete_veprove", description="🐖Najde slevy na mleté vepřové")
+    async def mlete_veprove(self, interaction: discord.Interaction) -> None:
+        await self._send_discounts(
+            interaction,
+            title="Mleté vepřové",
+            empty_text="Nebyly nalezeny žádné akce na Mleté vepřové",
+            error_text="Došlo k chybě při stahování akcí na Mleté vepřové",
+            url="https://www.kupi.cz/sleva/maso-mlete-veprove/",
+            emoji="🐖"
         )
