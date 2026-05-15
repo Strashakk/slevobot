@@ -12,6 +12,7 @@ import discord
 
 
 STATE_FILE = Path(__file__).with_name("lockin_state.json")
+MAX_LOCKIN_SECONDS = 4 * 7 * 24 * 60 * 60
 PRESET_LABELS = (
     "30m",
     "1h",
@@ -23,6 +24,9 @@ PRESET_LABELS = (
     "2d",
     "3d",
     "1w",
+    "2w",
+    "3w",
+    "4w",
 )
 
 
@@ -67,6 +71,9 @@ def _parse_duration_value(duration: str) -> int:
     if total_seconds <= 0:
         raise ValueError("Duration must be greater than zero")
 
+    if total_seconds > MAX_LOCKIN_SECONDS:
+        raise ValueError("Duration must not exceed 4 weeks")
+
     return total_seconds
 
 
@@ -78,10 +85,17 @@ async def _duration_autocomplete(
     current_value = current.lower().strip()
 
     suggestions: set[str] = {
-        preset for preset in PRESET_LABELS if preset.startswith(current_value)
+        preset
+        for preset in PRESET_LABELS
+        if preset.startswith(current_value)
+        and _duration_to_seconds(preset) <= MAX_LOCKIN_SECONDS
     }
 
-    if current_value and _is_valid_duration(current_value):
+    if (
+        current_value
+        and _is_valid_duration(current_value)
+        and _duration_to_seconds(current_value) <= MAX_LOCKIN_SECONDS
+    ):
         suggestions.add(current_value)
 
     return [
@@ -175,9 +189,10 @@ class LockinState:
 
 
 async def setup(bot: commands.Bot) -> None:
-    cog = LockIn(bot)
-    await bot.add_cog(cog)
-    await cog.resume_pending_restores()
+    if bot.user.bot:
+        cog = LockIn(bot)
+        await bot.add_cog(cog)
+        await cog.resume_pending_restores()
 
 
 class LockIn(commands.Cog):
@@ -187,7 +202,6 @@ class LockIn(commands.Cog):
         self.bot = bot
         self.state = LockinState()
 
-    lockin = app_commands.Group(name="lockin", description="🔐Lockin commands")
 
     async def _restore_role_after_timeout(
         self,
@@ -297,29 +311,23 @@ class LockIn(commands.Cog):
     def _parse_duration(self, duration: str) -> int:
         return _parse_duration_value(duration)
 
-    @lockin.command(name="self", description="🔐 Je čas zamknout se dovnitř")
-    @app_commands.describe(duration="How long the role should stay removed, for example 4h, 8h, 24h, tomorrow")
+    @app_commands.command(name="lockin", description="🔐 Je čas zamknout se dovnitř")
+    @app_commands.describe(duration="Po jakou dobu odebrat role? Např. 8h, 1d, 1w (maximum 4 týdny)")
     @app_commands.checks.bot_has_permissions(manage_roles=True, moderate_members=True)
     @app_commands.autocomplete(duration=_duration_autocomplete)
+    @app_commands.guild_only()
     async def _self(
         self,
         interaction: discord.Interaction,
         duration: str,
     ) -> None:
-        if interaction.guild is None:
-            await interaction.response.send_message("This command can only be used in a server.", ephemeral=True)
-            return
-
         member = interaction.user
-        if not isinstance(member, discord.Member):
-            await interaction.response.send_message("This command can only be used in a server.", ephemeral=True)
-            return
 
         try:
             restore_delay_seconds = self._parse_duration(duration)
         except ValueError:
             await interaction.response.send_message(
-                "Invalid duration. Try something like 4h, 8h, 24h, tomorrow, 2d, or 1w.",
+                "Špatná doba trvání! Zkus např. 8h, 1d, 1w (maximum 4 týdny)",
                 ephemeral=True,
             )
             return
@@ -335,7 +343,7 @@ class LockIn(commands.Cog):
         # If we neither removed roles nor applied a timeout, treat as error
         if not removed_ids and timeout_notice:
             await interaction.response.send_message(
-                "No removable roles were found or removal+timeout failed.",
+                "Žádné odstranitelné role nebyly nalezeny, nebo jejich odstranění selhalo.",
                 ephemeral=True,
             )
             return
@@ -356,19 +364,11 @@ class LockIn(commands.Cog):
             ephemeral=bool(timeout_notice),
         )
 
-    @lockin.command(name="remove", description="Admin: cancel a user's lockin and restore them")
+    @app_commands.command(name="lockin_remove", description="👑🔐Admin: předčasně zruší uživatelův lockin a obnoví jejich role")
     @app_commands.checks.bot_has_permissions(manage_roles=True, moderate_members=True)
     @app_commands.default_permissions(administrator=True)
+    @app_commands.guild_only()
     async def remove(self, interaction: discord.Interaction, member: discord.Member) -> None:
-        if interaction.guild is None:
-            await interaction.response.send_message("This command can only be used in a server.", ephemeral=True)
-            return
-
-        invoker = interaction.user
-        if not isinstance(invoker, discord.Member):
-            await interaction.response.send_message("This command can only be used in a server.", ephemeral=True)
-            return
-
         no_ping_mentions = discord.AllowedMentions(
             users=False, roles=False, everyone=False)
         member_mention = member.mention
@@ -398,7 +398,7 @@ class LockIn(commands.Cog):
 
             if roles_to_add:
                 try:
-                    await target.add_roles(*roles_to_add, reason=f"Admin {invoker} cancelled lockin")
+                    await target.add_roles(*roles_to_add, reason=f"Admin {interaction.user} cancelled lockin")
                 except (discord.Forbidden, discord.HTTPException):
                     note_parts.append(
                         "Could not add some roles (missing permissions or API error).")
@@ -406,7 +406,7 @@ class LockIn(commands.Cog):
         # Try to clear timeout if present
         if target is not None:
             try:
-                await target.timeout(None, reason=f"Admin {invoker} cancelled lockin")
+                await target.timeout(None, reason=f"Admin {interaction.user} cancelled lockin")
                 note_parts.append("Timeout removed.")
             except (discord.Forbidden, discord.HTTPException):
                 note_parts.append(
@@ -419,24 +419,12 @@ class LockIn(commands.Cog):
         else:
             await interaction.response.send_message(f"{member_mention} byl odemčen ven", allowed_mentions=no_ping_mentions)
 
-    @lockin.command(name="apply", description="Admin: apply lockin to another user")
-    @app_commands.describe(duration="How long the role should stay removed, for example 4h, 8h, 24h, tomorrow")
+    @app_commands.command(name="lockin_apply", description="👑🔐Admin: Zamkni dovnitř jiného uživatele")
+    @app_commands.describe(duration="Po jakou dobu odebrat role? Např. 8h, 1d, 1w (maximum 4 týdny)")
     @app_commands.checks.bot_has_permissions(manage_roles=True, moderate_members=True)
     @app_commands.default_permissions(administrator=True)
+    @app_commands.guild_only()
     async def apply(self, interaction: discord.Interaction, member: discord.Member, duration: str = '8h') -> None:
-        if interaction.guild is None:
-            await interaction.response.send_message("This command can only be used in a server.", ephemeral=True)
-            return
-
-        invoker = interaction.user
-        if not isinstance(invoker, discord.Member):
-            await interaction.response.send_message("This command can only be used in a server.", ephemeral=True)
-            return
-
-        if not (invoker.guild_permissions.manage_roles or invoker.guild_permissions.administrator):
-            await interaction.response.send_message("You need Manage Roles or Administrator to use this command.", ephemeral=True)
-            return
-
         no_ping_mentions = discord.AllowedMentions(
             users=False, roles=False, everyone=False)
         member_mention = member.mention
@@ -445,13 +433,13 @@ class LockIn(commands.Cog):
             restore_delay_seconds = self._parse_duration(duration)
         except ValueError:
             await interaction.response.send_message(
-                "Invalid duration. Try something like 4h, 8h, 24h, tomorrow, 2d, or 1w.",
+                "Špatná doba trvání! Zkus např. 8h, 1d, 1w (maximum 4 týdny)",
                 ephemeral=True,
             )
             return
 
         if await self.state.has_entry(interaction.guild.id, member.id):
-            await interaction.response.send_message(f"{member_mention} is already locked in.", allowed_mentions=no_ping_mentions, ephemeral=True)
+            await interaction.response.send_message(f"{member_mention} je už zamčený dovnitř!. 🐐", allowed_mentions=no_ping_mentions, ephemeral=True)
             return
 
         # cancel any existing pending restore for that member
