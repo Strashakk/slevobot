@@ -14,7 +14,16 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: deploy
           key: ${{ secrets.SSH_KEY }}
-          # Run the deploy script from the repository on the remote host.
-          # Use bash to execute the script so it runs even if not marked executable.
+          # Change to the repository directory on the remote host, fail fast if missing,
+          # pull latest changes and execute the deploy script. Any non-zero exit will
+          # make the SSH action fail, surfacing the error in GitHub Actions.
           script: |
-            bash ./slevobot/deploy
+            set -euo pipefail
+            REPO_DIR=~/slevobot
+            if [ ! -d "$REPO_DIR" ]; then
+              echo "Repository directory $REPO_DIR not found on remote host"
+              exit 1
+            fi
+            cd "$REPO_DIR"
+            git pull origin main || { echo "git pull failed"; exit 1; }
+            bash ./deploy.sh
