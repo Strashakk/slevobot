@@ -312,7 +312,7 @@ class LockIn(commands.Cog):
         return _parse_duration_value(duration)
 
     @app_commands.command(name="lockin", description="🔐 Je čas zamknout se dovnitř")
-    @app_commands.describe(duration="Po jakou dobu odebrat role? Např. 8h, 1d, 1w (maximum 4 týdny)")
+    @app_commands.describe(duration="Po jakou dobu zamknout dovnitř? Např. 8h, 1d, 1w (maximum 4 týdny)")
     @app_commands.checks.bot_has_permissions(manage_roles=True, moderate_members=True)
     @app_commands.autocomplete(duration=_duration_autocomplete)
     @app_commands.guild_only()
