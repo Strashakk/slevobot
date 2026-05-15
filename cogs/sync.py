@@ -21,8 +21,8 @@ class Sync(commands.Cog):
             guild = discord.Object(id=int(guild_id)) if guild_id else None
             if guild:
                 self.bot.tree.copy_global_to(guild=guild)
-
-            for cmd in self.bot.extensions.keys():
+            cmds = list(self.bot.extensions.keys())
+            for cmd in cmds:
                 await self.bot.reload_extension(cmd)
 
             synced = await self.bot.tree.sync(guild=guild)
