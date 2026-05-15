@@ -14,7 +14,7 @@ intents.message_content = True
 class Slevobot(commands.Bot):
     async def setup_hook(self) -> None:
         await self.load_extension('cogs.dluhy')
-        await self.load_extension('cogs.rizky')
+        await self.load_extension('cogs.akce')
         await self.load_extension('cogs.sync')
         await self.load_extension('cogs.lockin')
 
