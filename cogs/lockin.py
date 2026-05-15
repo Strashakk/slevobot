@@ -452,12 +452,14 @@ class LockIn(commands.Cog):
         else:
             await interaction.response.send_message(f"{member_mention} byl odemčen ven", allowed_mentions=no_ping_mentions)
 
-    @app_commands.command(name="lockin_apply", description="👑🔐Admin: Zamkni dovnitř jiného uživatele")
-    @app_commands.describe(duration="Po jakou dobu odebrat role? Např. 8h, 1d, 1w (maximum 4 týdny)")
-    @app_commands.checks.bot_has_permissions(manage_roles=True, moderate_members=True)
-    @app_commands.check(lambda inter: getattr(inter.user, "guild_permissions", None) and inter.user.guild_permissions.administrator)
-    @app_commands.default_permissions(administrator=True)
-    @app_commands.guild_only()
+    # Disabled: admin apply command is intentionally deactivated.
+    # To re-enable, uncomment the decorators below.
+    # @app_commands.command(name="lockin_apply", description="👑🔐Admin: Zamkni dovnitř jiného uživatele")
+    # @app_commands.describe(duration="Po jakou dobu odebrat role? Např. 8h, 1d, 1w (maximum 4 týdny)")
+    # @app_commands.checks.bot_has_permissions(manage_roles=True, moderate_members=True)
+    # @app_commands.check(lambda inter: getattr(inter.user, "guild_permissions", None) and inter.user.guild_permissions.administrator)
+    # @app_commands.default_permissions(administrator=True)
+    # @app_commands.guild_only()
     async def apply(self, interaction: discord.Interaction, member: discord.Member, duration: str = '8h') -> None:
         # runtime admin check
         member_user = interaction.user
