@@ -15,10 +15,10 @@ jobs:
           username: deploy
           key: ${{ secrets.SSH_KEY }}
           # Change to the repository directory on the remote host, fail fast if missing,
-          # pull latest changes and execute the deploy script. Any non-zero exit will
-          # make the SSH action fail, surfacing the error in GitHub Actions.
+          # pull latest changes and execute the deploy script. The remote exit code is
+          # printed explicitly so GitHub Actions logs show whether deploy succeeded.
           script: |
-            set -euo pipefail
+            set -u
             REPO_DIR=~/slevobot
             if [ ! -d "$REPO_DIR" ]; then
               echo "Repository directory $REPO_DIR not found on remote host"
@@ -27,3 +27,6 @@ jobs:
             cd "$REPO_DIR"
             git pull origin main || { echo "git pull failed"; exit 1; }
             bash ./deploy.sh
+            DEPLOY_STATUS=$?
+            echo "DEPLOY_STATUS=${DEPLOY_STATUS}"
+            exit "$DEPLOY_STATUS"

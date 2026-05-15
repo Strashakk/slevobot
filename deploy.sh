@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+trap 'echo "[deploy] FAILED"' ERR
 
 # Ensure we run from repository root if invoked from elsewhere
 cd "$(dirname "$0")" || exit 1
