@@ -2,6 +2,7 @@ import os
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
+import logging
 
 load_dotenv()
 
@@ -25,6 +26,9 @@ bot = Slevobot(command_prefix=commands.when_mentioned_or('!'), intents=intents)
 @bot.event
 async def on_ready() -> None:
     print(f'Bot {bot.user} byl úspěšně spuštěn!')
+
+# basic logging so our cog logs are visible in container logs
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(name)s: %(message)s')
 
 # Spuštění bota
 token = os.getenv("DISCORD_TOKEN")
