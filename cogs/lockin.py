@@ -366,11 +366,13 @@ class LockIn(commands.Cog):
 
     @app_commands.command(name="lockin_remove", description="👑🔐Admin: předčasně zruší uživatelův lockin a obnoví jejich role")
     @app_commands.checks.bot_has_permissions(manage_roles=True, moderate_members=True)
-    @app_commands.default_permissions(administrator=True)
     @app_commands.guild_only()
     async def remove(self, interaction: discord.Interaction, member: discord.Member) -> None:
         # runtime admin check to avoid app_commands check raising and sending automatic errors
-        if not getattr(interaction.user, "guild_permissions", None) or not interaction.user.guild_permissions.administrator:
+        member_user = interaction.user
+        if not isinstance(member_user, discord.Member):
+            member_user = interaction.guild.get_member(interaction.user.id)
+        if member_user is None or not member_user.guild_permissions.administrator:
             await interaction.response.send_message(
                 "Nemáš oprávnění — pouze administrátoři mohou použít tento příkaz.",
                 ephemeral=True,
@@ -429,11 +431,13 @@ class LockIn(commands.Cog):
     @app_commands.command(name="lockin_apply", description="👑🔐Admin: Zamkni dovnitř jiného uživatele")
     @app_commands.describe(duration="Po jakou dobu odebrat role? Např. 8h, 1d, 1w (maximum 4 týdny)")
     @app_commands.checks.bot_has_permissions(manage_roles=True, moderate_members=True)
-    @app_commands.default_permissions(administrator=True)
     @app_commands.guild_only()
     async def apply(self, interaction: discord.Interaction, member: discord.Member, duration: str = '8h') -> None:
-        # runtime admin check to avoid app_commands check raising and sending automatic errors
-        if not getattr(interaction.user, "guild_permissions", None) or not interaction.user.guild_permissions.administrator:
+        # runtime admin check
+        member_user = interaction.user
+        if not isinstance(member_user, discord.Member):
+            member_user = interaction.guild.get_member(interaction.user.id)
+        if member_user is None or not member_user.guild_permissions.administrator:
             await interaction.response.send_message(
                 "Nemáš oprávnění — pouze administrátoři mohou použít tento příkaz.",
                 ephemeral=True,
