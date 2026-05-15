@@ -366,6 +366,7 @@ class LockIn(commands.Cog):
 
     @app_commands.command(name="lockin_remove", description="👑🔐Admin: předčasně zruší uživatelův lockin a obnoví jejich role")
     @app_commands.checks.bot_has_permissions(manage_roles=True, moderate_members=True)
+    @app_commands.check(lambda inter: getattr(inter.user, "guild_permissions", None) and inter.user.guild_permissions.administrator)
     @app_commands.guild_only()
     async def remove(self, interaction: discord.Interaction, member: discord.Member) -> None:
         # runtime admin check to avoid app_commands check raising and sending automatic errors
@@ -431,6 +432,7 @@ class LockIn(commands.Cog):
     @app_commands.command(name="lockin_apply", description="👑🔐Admin: Zamkni dovnitř jiného uživatele")
     @app_commands.describe(duration="Po jakou dobu odebrat role? Např. 8h, 1d, 1w (maximum 4 týdny)")
     @app_commands.checks.bot_has_permissions(manage_roles=True, moderate_members=True)
+    @app_commands.check(lambda inter: getattr(inter.user, "guild_permissions", None) and inter.user.guild_permissions.administrator)
     @app_commands.guild_only()
     async def apply(self, interaction: discord.Interaction, member: discord.Member, duration: str = '8h') -> None:
         # runtime admin check
@@ -483,3 +485,29 @@ class LockIn(commands.Cog):
             allowed_mentions=no_ping_mentions,
             ephemeral=bool(timeout_notice),
         )
+
+    async def cog_app_command_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError) -> None:
+        # Provide a consistent, ephemeral message for permission/check failures
+        if isinstance(error, app_commands.CheckFailure):
+            msg = "Nemáš oprávnění — pouze administrátoři mohou použít tento příkaz."
+            try:
+                if interaction.response.is_done():
+                    await interaction.followup.send(msg, ephemeral=True)
+                else:
+                    await interaction.response.send_message(msg, ephemeral=True)
+            except Exception:
+                # ignore any send errors
+                pass
+            return
+        if isinstance(error, app_commands.BotMissingPermissions):
+            msg = "Mám nedostatečná oprávnění k provedení této akce."
+            try:
+                if interaction.response.is_done():
+                    await interaction.followup.send(msg, ephemeral=True)
+                else:
+                    await interaction.response.send_message(msg, ephemeral=True)
+            except Exception:
+                pass
+            return
+        # Re-raise other errors so they can be logged by the bot
+        raise error
