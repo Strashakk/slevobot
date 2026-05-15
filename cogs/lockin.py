@@ -361,11 +361,12 @@ class LockIn(commands.Cog):
             + discord.utils.format_dt(restore_time, style="R")
             + ")",
             allowed_mentions=no_ping_mentions,
-            ephemeral=bool(timeout_notice),
+            ephemeral=False,
         )
 
     @app_commands.command(name="lockin_remove", description="👑🔐Admin: předčasně zruší uživatelův lockin a obnoví jejich role")
     @app_commands.checks.bot_has_permissions(manage_roles=True, moderate_members=True)
+    @app_commands.checks.has_permissions(administrator=True)
     @app_commands.default_permissions(administrator=True)
     @app_commands.guild_only()
     async def remove(self, interaction: discord.Interaction, member: discord.Member) -> None:
@@ -422,6 +423,7 @@ class LockIn(commands.Cog):
     @app_commands.command(name="lockin_apply", description="👑🔐Admin: Zamkni dovnitř jiného uživatele")
     @app_commands.describe(duration="Po jakou dobu odebrat role? Např. 8h, 1d, 1w (maximum 4 týdny)")
     @app_commands.checks.bot_has_permissions(manage_roles=True, moderate_members=True)
+    @app_commands.checks.has_permissions(administrator=True)
     @app_commands.default_permissions(administrator=True)
     @app_commands.guild_only()
     async def apply(self, interaction: discord.Interaction, member: discord.Member, duration: str = '8h') -> None:
