@@ -15,12 +15,14 @@ git clean -fd
 echo "[deploy] synced commit: $(git rev-parse --short HEAD)"
 
 echo "[deploy] building and starting containers"
-if ! command -v docker >/dev/null 2>&1; then
+if command -v sudo >/dev/null 2>&1; then
+	sudo -n /usr/bin/docker compose up -d --build --remove-orphans
+elif ! command -v docker >/dev/null 2>&1; then
 	echo "[deploy] docker is not installed or not in PATH"
 	exit 1
+else
+	docker compose up -d --build --remove-orphans
 fi
-
-docker compose up -d --build --remove-orphans
 
 echo "[deploy] SUCCESS"
 exit 0
