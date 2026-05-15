@@ -8,12 +8,10 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy over SSH
+      - name: Deploy přes SSH
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
+          username: deploy
           key: ${{ secrets.SSH_KEY }}
-          script: |
-            cd ~/slevobot
-            bash deploy.sh
+          script: echo "deploy triggered"
