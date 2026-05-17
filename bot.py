@@ -4,6 +4,9 @@ from discord.ext import commands
 from dotenv import load_dotenv
 import logging
 
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(name)s: %(message)s')
+logger = logging.getLogger(__name__)
+
 load_dotenv()
 
 
@@ -25,14 +28,13 @@ bot = Slevobot(command_prefix=commands.when_mentioned_or('!'), intents=intents)
 
 @bot.event
 async def on_ready() -> None:
-    print(f'Bot {bot.user} byl úspěšně spuštěn!')
+    logger.info(f'Bot {bot.user} byl úspěšně spuštěn!')
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(name)s: %(message)s')
+if __name__ == "__main__":
+    # Spuštění bota
+    token = os.getenv("DISCORD_TOKEN")
+    if not token or not token.strip():
+        print("ERROR: DISCORD_TOKEN není nastavený. Doplň ho do .env souboru.")
+        raise SystemExit(1)
 
-# Spuštění bota
-token = os.getenv("DISCORD_TOKEN")
-if not token or not token.strip():
-    print("ERROR: DISCORD_TOKEN není nastavený. Doplň ho do .env souboru.")
-    raise SystemExit(1)
-
-bot.run(token)
+    bot.run(token)
