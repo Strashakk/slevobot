@@ -127,3 +127,14 @@ class Akce(commands.Cog):
             url="https://www.kupi.cz/sleva/maso-mlete-veprove/",
             emoji="🐖"
         )
+
+    @app_commands.command(name="branik", description="🍺Najde slevy na branika")
+    async def branik(self, interaction: discord.Interaction) -> None:
+        await self._send_discounts(
+            interaction,
+            title="Braník",
+            empty_text="Nebyly nalezeny žádné akce na Braníka",
+            error_text="Došlo k chybě při stahování akcí na Braníka",
+            url="https://www.kupi.cz/sleva/pivo-svetle-vycepni-10-branik/",
+            emoji="🍺"
+        )
