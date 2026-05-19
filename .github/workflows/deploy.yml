@@ -1,0 +1,34 @@
+name: Deploy to Oracle VPS
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy přes SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: deploy
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            set -u
+            echo "REMOTE_USER=$(whoami)"
+            echo "REMOTE_HOME=$HOME"
+            REPO_DIR=/home/deploy/slevobot
+            if [ ! -d "$REPO_DIR" ]; then
+              echo "Repository directory $REPO_DIR not found on remote host"
+              echo "Hint: clone the repo under /home/deploy and make sure deploy owns it."
+              exit 1
+            fi
+            cd "$REPO_DIR"
+            echo "REMOTE_PWD=$(pwd)"
+            echo "REMOTE_HEAD_BEFORE=$(git rev-parse --short HEAD)"
+            bash ./deploy.sh
+            status=$?
+            echo "DEPLOY_STATUS=${status}"
+            echo "REMOTE_HEAD_AFTER=$(git rev-parse --short HEAD)"
+            exit "$status"
