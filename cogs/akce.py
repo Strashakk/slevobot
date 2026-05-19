@@ -17,7 +17,7 @@ class Akce(commands.Cog):
 
     @staticmethod
     def _build_message(title: str, emoji: str, vysledky: ScrapedProducts) -> str:
-        zprava = f"{emoji} **{title} - {"nalezeno" if len(vysledky) != 1 else "nalezena"} {len(vysledky)} {"akcí" if len(vysledky) != 1 else "akce"}:**\n"
+        zprava = f"{emoji} **{title} - {'nalezeno' if len(vysledky) != 1 else 'nalezena'} {len(vysledky)} {'akcí' if len(vysledky) != 1 else 'akce'}:**\n"
         for i, v in enumerate(vysledky, 1):
             zprava += (
                 f"**{i}. {v['nazev']}**"
