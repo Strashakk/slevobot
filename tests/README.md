@@ -1,12 +1,12 @@
 ## Setup
-Je potřeba nejdřív nainstalovat requirements.txt pro testy.
+Nejdřív nainstaluj requirements pro testy a samotný projekt:
 
-Třeba takto:
 ```bash
 pip install -r requirements.txt
+pip install -r tests/requirements.txt
 ```
 
-## Takhle to spusť
+## Spusteni
 ```bash
-python3 -m pytest tests/test_rizky.py -v
+python3 -m pytest tests/test_akce.py -v
 ```
