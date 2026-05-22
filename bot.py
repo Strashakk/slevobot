@@ -80,7 +80,14 @@ async def on_ready() -> None:
         else:
             try:
                 channel = bot.get_channel(channel_id_int) or await bot.fetch_channel(channel_id_int)
-                await channel.send('Bot byl spuštěn!')
+                if isinstance(channel, discord.abc.Messageable):
+                    await channel.send('Bot byl spuštěn!')
+                else:
+                    logging.warning(
+                        'Channel %s is not messageable (got %s). Startup message was not sent.',
+                        channel_id_int,
+                        type(channel).__name__,
+                    )
             except discord.Forbidden:
                 logging.warning('Could not send message to channel %s.', channel_id_int)
             except discord.NotFound:
