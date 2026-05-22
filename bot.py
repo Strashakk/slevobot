@@ -20,11 +20,29 @@ class Slevobot(commands.Bot):
 
 
 bot = Slevobot(command_prefix=commands.when_mentioned_or('!'), intents=intents)
+startup_message_sent = False
 
 
 @bot.event
 async def on_ready() -> None:
-    print(f'Bot {bot.user} byl úspěšně spuštěn!')
+    global startup_message_sent
+    logging.log(logging.INFO, f'Bot {bot.user} byl úspěšně spuštěn!')
+
+    if startup_message_sent:
+        return
+
+    startup_message_sent = True
+
+    channel_id = 1478443099679227930
+    try:
+        channel = bot.get_channel(channel_id) or await bot.fetch_channel(channel_id)
+        await channel.send(f'Bot byl spuštěn!')
+    except discord.Forbidden:
+        logging.warning('Could not send message to channel %s.', channel_id)
+    except discord.NotFound:
+        logging.warning('Channel %s does not exist or is not accessible.', channel_id)
+    except discord.HTTPException:
+        logging.exception('Failed to send startup message to channel %s.', channel_id)
 
 # Spuštění bota
 token = os.getenv("DISCORD_TOKEN")
