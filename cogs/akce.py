@@ -139,3 +139,26 @@ class Akce(commands.Cog):
             emoji="🍺",
             filter_=r"2,0l|2\s*l"
         )
+
+    @app_commands.command(name="bezlepkovy_chlebik", description="Najde slevy na Pan Blanco chlebik")
+    async def bezlepkovy_chlebik(self, interaction: discord.Interaction) -> None:
+        await self._send_discounts(
+            interaction,
+            title="Pan Blanco",
+            empty_text="Nebyly nalezeny žádné akce na Pan Blanco",
+            error_text="Došlo k chybě při stahování akcí na Pan Blanco",
+            url="https://www.kupi.cz/sleva/chleb-bez-lepku-pan-blanco-schar",
+            emoji="🍞",
+        )
+
+    @app_commands.command(name="pepsi", description="Najde slevy na limonádu Pepsi")
+    async def pepsi(self, interaction: discord.Interaction) -> None:
+        await self._send_discounts(
+            interaction,
+            title="Pepsi",
+            empty_text="Nebyly nalezeny žádné akce na Pepsi",
+            error_text="Došlo k chybě při stahování akcí na Pepsi",
+            url="https://www.kupi.cz/sleva/limonada-pepsi",
+            emoji="🍹",
+            filter_ = r"2([,.]\d+)?\s*l"
+        )
