@@ -74,14 +74,19 @@ async def on_ready() -> None:
         logging.warning('HOME_CHANNEL_ID není nastavený. Nelze poslat zprávu o spuštění bota.')
     else:
         try:
-            channel = bot.get_channel(channel_id) or await bot.fetch_channel(channel_id)
-            await channel.send(f'Bot byl spuštěn!')
-        except discord.Forbidden:
-            logging.warning('Could not send message to channel %s.', channel_id)
-        except discord.NotFound:
-            logging.warning('Channel %s does not exist or is not accessible.', channel_id)
-        except discord.HTTPException:
-            logging.exception('Failed to send startup message to channel %s.', channel_id)
+            channel_id_int = int(channel_id.strip())
+        except (TypeError, ValueError):
+            logging.warning('HOME_CHANNEL_ID má neplatnou hodnotu %r. Nelze poslat zprávu o spuštění bota.', channel_id)
+        else:
+            try:
+                channel = bot.get_channel(channel_id_int) or await bot.fetch_channel(channel_id_int)
+                await channel.send('Bot byl spuštěn!')
+            except discord.Forbidden:
+                logging.warning('Could not send message to channel %s.', channel_id_int)
+            except discord.NotFound:
+                logging.warning('Channel %s does not exist or is not accessible.', channel_id_int)
+            except discord.HTTPException:
+                logging.exception('Failed to send startup message to channel %s.', channel_id_int)
 
 LOG_PATH = configure_logging()
 if __name__ == "__main__":
