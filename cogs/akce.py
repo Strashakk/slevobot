@@ -148,7 +148,7 @@ class Akce(commands.Cog):
             empty_text="Nebyly nalezeny žádné akce na Pan Blanco",
             error_text="Došlo k chybě při stahování akcí na Pan Blanco",
             url="https://www.kupi.cz/sleva/chleb-bez-lepku-pan-blanco-schar",
-            emoji="🦃",
+            emoji="🍞",
         )
 
     @app_commands.command(name="pepsi", description="Najde slevy na limonádu Pepsi")
