@@ -17,6 +17,4 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
             cd ~/slevobot
-            git pull origin main
-            docker compose up --build -d
-            docker image prune -f
+            bash ./deploy.sh
