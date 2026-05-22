@@ -161,4 +161,16 @@ class Akce(commands.Cog):
             url="https://www.kupi.cz/sleva/limonada-pepsi",
             emoji="🍹",
             filter_ = r"2([,.]\d+)?\s*l"
+        ) 
+    
+    @app_commands.command(name="kofola", description="Najde slevy na limonádu Kofola")
+    async def kofola(self, interaction: discord.Interaction) -> None:
+        await self._send_discounts(
+            interaction,
+            title="Kofola",
+            empty_text="Nebyly nalezeny žádné akce na Kofolu",
+            error_text="Došlo k chybě při stahování akcí na Kofolu",
+            url="https://www.kupi.cz/sleva/limonada-kofola",
+            emoji="🍹",
+            filter_ = r"2([,.]\d+)?\s*l"
         )
