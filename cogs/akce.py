@@ -39,7 +39,7 @@ class Akce(commands.Cog):
             vysledky = self.scraper.scrape(url)
             if filter_:
                 vysledky = list(
-                    filter(lambda x: whitelist if re.search(filter_, x["nazev"]) is not None else not whitelist, vysledky))
+                    filter(lambda x: whitelist if (re.search(filter_, x["nazev"]) is not None or re.search(filter_, x["cena"]) is not None) else not whitelist, vysledky))
             if vysledky:
                 meowssage = self._build_message(title, emoji, vysledky)
 
@@ -57,7 +57,7 @@ class Akce(commands.Cog):
             vysledky = self.scraper.scrape(url)
             if filter_:
                 vysledky = list(
-                    filter(lambda x: whitelist if re.search(filter_, x["nazev"]) is not None else not whitelist, vysledky))
+                    filter(lambda x: whitelist if (re.search(filter_, x["nazev"]) is not None or re.search(filter_, x["cena"]) is not None) else not whitelist, vysledky))
             if not vysledky:
                 await ctx.send(empty_text)
                 return
@@ -126,4 +126,16 @@ class Akce(commands.Cog):
             error_text="Došlo k chybě při stahování akcí na Mleté vepřové",
             url="https://www.kupi.cz/sleva/maso-mlete-veprove/",
             emoji="🐖"
+        )
+
+    @app_commands.command(name="branik", description="🍺Najde slevy na Branika 2L")
+    async def branik(self, interaction: discord.Interaction) -> None:
+        await self._send_discounts(
+            interaction,
+            title="Braník 2L",
+            empty_text="Nebyly nalezeny žádné akce na Braníka 2L",
+            error_text="Došlo k chybě při stahování akcí na Braníka 2L",
+            url="https://www.kupi.cz/sleva/pivo-svetle-vycepni-10-branik/",
+            emoji="🍺",
+            filter_=r"2,0l|2\s*l"
         )

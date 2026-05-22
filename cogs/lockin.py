@@ -5,6 +5,7 @@ import re
 from pathlib import Path
 from zoneinfo import ZoneInfo
 from time import time
+import logging
 
 from discord.ext import commands
 from discord import app_commands
@@ -201,6 +202,7 @@ class LockIn(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
         self.state = LockinState()
+        self._log = logging.getLogger(f"slevobot.cogs.lockin")
 
 
     async def _restore_role_after_timeout(
@@ -291,6 +293,11 @@ class LockIn(commands.Cog):
             except (discord.Forbidden, discord.HTTPException):
                 # if we can't remove roles, treat as no-op
                 removed_ids = []
+        # log what we tried to remove
+        try:
+            self._log.info("_start_lockin_for_member: invoker=%s target=%s removed_ids=%s", getattr(invoker, 'id', invoker), getattr(target, 'id', None), removed_ids)
+        except Exception:
+            pass
         # Always attempt to apply a timeout (works as a pure timeout even if no roles were removable)
         timeout_failed = False
         try:
@@ -298,6 +305,11 @@ class LockIn(commands.Cog):
         except (discord.Forbidden, discord.HTTPException):
             timeout_failed = True
             timeout_notice = " I could not apply the timeout (missing perms or API error)."
+        else:
+            try:
+                self._log.info("_start_lockin_for_member: timeout_applied invoker=%s target=%s seconds=%s", getattr(invoker, 'id', invoker), getattr(target, 'id', None), restore_delay_seconds)
+            except Exception:
+                pass
 
         # Persist the entry and schedule restoration if we removed roles or the timeout was applied successfully
         if removed_ids or not timeout_failed:
@@ -361,14 +373,35 @@ class LockIn(commands.Cog):
             + discord.utils.format_dt(restore_time, style="R")
             + ")",
             allowed_mentions=no_ping_mentions,
-            ephemeral=bool(timeout_notice),
+            ephemeral=False,
         )
 
     @app_commands.command(name="lockin_remove", description="👑🔐Admin: předčasně zruší uživatelův lockin a obnoví jejich role")
     @app_commands.checks.bot_has_permissions(manage_roles=True, moderate_members=True)
+    @app_commands.check(lambda inter: getattr(inter.user, "guild_permissions", None) and inter.user.guild_permissions.administrator)
     @app_commands.default_permissions(administrator=True)
     @app_commands.guild_only()
     async def remove(self, interaction: discord.Interaction, member: discord.Member) -> None:
+        # runtime admin check to avoid app_commands check raising and sending automatic errors
+        member_user = interaction.user
+        if not isinstance(member_user, discord.Member):
+            member_user = interaction.guild.get_member(interaction.user.id)
+            if member_user is None:
+                try:
+                    member_user = await interaction.guild.fetch_member(interaction.user.id)
+                except Exception:
+                    member_user = None
+        is_admin = bool(member_user and getattr(member_user, 'guild_permissions', None) and member_user.guild_permissions.administrator)
+        try:
+            self._log.info("lockin.remove invoked by id=%s name=%s is_admin=%s target=%s", interaction.user.id, getattr(interaction.user, 'name', None), is_admin, getattr(member, 'id', None))
+        except Exception:
+            pass
+        if not is_admin:
+            await interaction.response.send_message(
+                "Nemáš oprávnění — pouze administrátoři mohou použít tento příkaz.",
+                ephemeral=True,
+            )
+            return
         no_ping_mentions = discord.AllowedMentions(
             users=False, roles=False, everyone=False)
         member_mention = member.mention
@@ -422,9 +455,30 @@ class LockIn(commands.Cog):
     @app_commands.command(name="lockin_apply", description="👑🔐Admin: Zamkni dovnitř jiného uživatele")
     @app_commands.describe(duration="Po jakou dobu odebrat role? Např. 8h, 1d, 1w (maximum 4 týdny)")
     @app_commands.checks.bot_has_permissions(manage_roles=True, moderate_members=True)
+    @app_commands.check(lambda inter: getattr(inter.user, "guild_permissions", None) and inter.user.guild_permissions.administrator)
     @app_commands.default_permissions(administrator=True)
     @app_commands.guild_only()
     async def apply(self, interaction: discord.Interaction, member: discord.Member, duration: str = '8h') -> None:
+        # runtime admin check
+        member_user = interaction.user
+        if not isinstance(member_user, discord.Member):
+            member_user = interaction.guild.get_member(interaction.user.id)
+            if member_user is None:
+                try:
+                    member_user = await interaction.guild.fetch_member(interaction.user.id)
+                except Exception:
+                    member_user = None
+        is_admin = bool(member_user and getattr(member_user, 'guild_permissions', None) and member_user.guild_permissions.administrator)
+        try:
+            self._log.info("lockin.apply invoked by id=%s name=%s is_admin=%s target=%s duration=%s", interaction.user.id, getattr(interaction.user, 'name', None), is_admin, getattr(member, 'id', None), duration)
+        except Exception:
+            pass
+        if not is_admin:
+            await interaction.response.send_message(
+                "Nemáš oprávnění — pouze administrátoři mohou použít tento příkaz.",
+                ephemeral=True,
+            )
+            return
         no_ping_mentions = discord.AllowedMentions(
             users=False, roles=False, everyone=False)
         member_mention = member.mention
@@ -465,3 +519,29 @@ class LockIn(commands.Cog):
             allowed_mentions=no_ping_mentions,
             ephemeral=bool(timeout_notice),
         )
+
+    async def cog_app_command_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError) -> None:
+        # Provide a consistent, ephemeral message for permission/check failures
+        if isinstance(error, app_commands.CheckFailure):
+            msg = "Nemáš oprávnění — pouze administrátoři mohou použít tento příkaz."
+            try:
+                if interaction.response.is_done():
+                    await interaction.followup.send(msg, ephemeral=True)
+                else:
+                    await interaction.response.send_message(msg, ephemeral=True)
+            except Exception:
+                # ignore any send errors
+                pass
+            return
+        if isinstance(error, app_commands.BotMissingPermissions):
+            msg = "Mám nedostatečná oprávnění k provedení této akce."
+            try:
+                if interaction.response.is_done():
+                    await interaction.followup.send(msg, ephemeral=True)
+                else:
+                    await interaction.response.send_message(msg, ephemeral=True)
+            except Exception:
+                pass
+            return
+        # Re-raise other errors so they can be logged by the bot
+        raise error
