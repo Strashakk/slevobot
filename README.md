@@ -36,6 +36,7 @@ Discord bot v Pythonu pro trackování slev, dluhů přes API a lockin Discord c
 - `/branik` - pouze 2L PET
 - `/bezlepkovy_chlebik` - Pan Blanco chlebik 
 - `/pepsi` - 2L, 2.25L a 2.5L PET
+- `/kofola` - 2L, 2.25L a 2.5L PET
 
 ### 📈📉Dluhy
 **Vypisují Flowernalovy dluhy z API**
