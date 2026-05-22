@@ -56,11 +56,44 @@ def configure_logging() -> Path:
 
 
 bot = Slevobot(command_prefix=commands.when_mentioned_or('!'), intents=intents)
+startup_message_sent = False
 
 
 @bot.event
 async def on_ready() -> None:
+    global startup_message_sent
     logging.log(logging.INFO, f'Bot {bot.user} byl úspěšně spuštěn!')
+
+    if startup_message_sent:
+        return
+
+    startup_message_sent = True
+
+    channel_id = os.getenv("HOME_CHANNEL_ID")
+    if not channel_id or not channel_id.strip():
+        logging.warning('HOME_CHANNEL_ID není nastavený. Nelze poslat zprávu o spuštění bota.')
+    else:
+        try:
+            channel_id_int = int(channel_id.strip())
+        except (TypeError, ValueError):
+            logging.warning('HOME_CHANNEL_ID má neplatnou hodnotu %r. Nelze poslat zprávu o spuštění bota.', channel_id)
+        else:
+            try:
+                channel = bot.get_channel(channel_id_int) or await bot.fetch_channel(channel_id_int)
+                if isinstance(channel, discord.abc.Messageable):
+                    await channel.send('Bot byl spuštěn!')
+                else:
+                    logging.warning(
+                        'Channel %s is not messageable (got %s). Startup message was not sent.',
+                        channel_id_int,
+                        type(channel).__name__,
+                    )
+            except discord.Forbidden:
+                logging.warning('Could not send message to channel %s.', channel_id_int)
+            except discord.NotFound:
+                logging.warning('Channel %s does not exist or is not accessible.', channel_id_int)
+            except discord.HTTPException:
+                logging.exception('Failed to send startup message to channel %s.', channel_id_int)
 
 LOG_PATH = configure_logging()
 if __name__ == "__main__":
