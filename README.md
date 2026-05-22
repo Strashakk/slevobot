@@ -6,7 +6,7 @@ Discord bot v Pythonu pro trackování slev, dluhů přes API a lockin Discord c
 
 - Vyhledává akce na [kupi.cz](https://www.kupi.cz) pro vybrané produkty (Řízky, vajíčka, mleté, monstery..).
 - Zobrazuje všechny dluhy v Flowernal API.
-- Dočasný "lockin" na discordu - timeout a odstranění rolí.
+- Dočasný "lockin" na Discordu - timeout a odstranění rolí.
 - Výpis logů na Discord pomocí příkazu.
 
 ## 🌟Hvězdná historie
