@@ -9,6 +9,6 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
-RUN uv sync --locked
+RUN uv sync --locked --no-dev
 
 CMD ["uv", "run", "python", "bot.py"]
