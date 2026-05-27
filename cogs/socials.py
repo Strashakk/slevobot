@@ -19,7 +19,7 @@ class Socials(commands.Cog):
             return
 
         matches: list[str] = findall(
-            r'(https?://[^\s]+)', message.content.lower())
+            r'(https?://[^\s]+)', message.content)
 
         if len(matches) > 0:
             # Suppress embeds from original message
