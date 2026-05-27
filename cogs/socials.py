@@ -20,13 +20,16 @@ class Socials(commands.Cog):
 
         matches: list[str] = findall(
             r'(https?://[^\s]+)', message.content)
-
+        supressed = False
         if len(matches) > 0:
             # Suppress embeds from original message
-            await message.edit(suppress=True)
+
             for url in matches:
                 for key in list(self.translations.keys()):
                     if key in url:
+                        if supressed:
+                            await message.edit(suppress=True)
+                            supressed = True
                         # Replace url with better embed
                         newMessage = url.replace(
                             key, self.translations[key])
