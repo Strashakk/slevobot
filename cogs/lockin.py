@@ -118,7 +118,12 @@ async def _member_autocomplete(
         state = await LockinState(STATE_FILE).load_state()
         ids = [s["member_id"] for s in state if s["guild_id"] == guild_id]
         for member_id in ids:
-            member = await guild.fetch_member(int(member_id))
+            member = guild.get_member(member_id)
+            if not member:
+                try:
+                    member = await guild.fetch_member(member_id)
+                except discord.NotFound:
+                    continue
             if member:
                 label = f"{member.nick} (@{member.name})" if member.nick else f"@{member.name}"
 
@@ -553,6 +558,47 @@ class LockIn(commands.Cog):
             allowed_mentions=no_ping_mentions,
             ephemeral=bool(timeout_notice),
         )
+
+    @app_commands.command(name="lockin_list", description="👑🔐Admin: Zobraz seznam zamčených lidí")
+    @app_commands.checks.bot_has_permissions(manage_roles=True, moderate_members=True)
+    @app_commands.check(lambda inter: getattr(inter.user, "guild_permissions", None) and inter.user.guild_permissions.administrator)
+    @app_commands.default_permissions(administrator=True)
+    @app_commands.guild_only()
+    async def list(self, interaction: discord.Interaction):
+        await interaction.response.defer(thinking=True)
+        guild = interaction.guild
+        no_ping_mentions = discord.AllowedMentions(
+            users=False, roles=False, everyone=False)
+        if not guild:
+            await interaction.followup.send("No guild found.")
+            return
+        state = await self.state.load_state()
+        entries = [s for s in state if s["guild_id"] == guild.id]
+        if len(entries) == 0:
+            await interaction.followup.send("Nikdo není zamčený dovnitř")
+            return
+        lines: list[str] = []
+        for entry in entries:
+            member = guild.get_member(entry["member_id"])
+            if not member:
+                try:
+                    member = await guild.fetch_member(entry["member_id"])
+                except discord.NotFound:
+                    continue
+            restore_time = datetime.datetime.fromtimestamp(
+                entry["restore_at"], tz=datetime.timezone.utc)
+
+            lines.append(
+                f"{member.mention} do {discord.utils.format_dt(restore_time, style='F')} ({discord.utils.format_dt(restore_time, style='R')})"
+            )
+
+        embed = discord.Embed(
+            title="Seznam zamčených lidí",
+            description="\n".join(f"• {line}" for line in lines),
+            color=discord.Color.blue(),
+        )
+        embed.set_footer(text=f"Celkem: {len(lines)}")
+        await interaction.followup.send(embed=embed, allowed_mentions=no_ping_mentions)
 
     async def cog_app_command_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError) -> None:
         # Provide a consistent, ephemeral message for permission/check failures
