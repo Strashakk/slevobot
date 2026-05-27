@@ -105,6 +105,31 @@ async def _duration_autocomplete(
     ]
 
 
+async def _member_autocomplete(
+    interaction: discord.Interaction,
+    current: str
+) -> list[app_commands.Choice[str]]:
+
+    choices = []
+    guild = interaction.guild
+
+    if guild:
+        guild_id = guild.id
+        state = await LockinState(STATE_FILE).load_state()
+        ids = [s["member_id"] for s in state if s["guild_id"] == guild_id]
+        for member_id in ids:
+            member = await guild.fetch_member(int(member_id))
+            if member:
+                label = f"{member.nick} (@{member.name})" if member.nick else f"@{member.name}"
+
+                if current.lower() in label.lower():
+                    choices.append(app_commands.Choice(
+                        name=label, value=str(member.id)))
+
+    # Discord limits autocomplete to a maximum of 25 choices
+    return choices[:25]
+
+
 def _seconds_until_midnight() -> int:
     tz = ZoneInfo("Europe/Prague")
     now = datetime.datetime.now(tz)
@@ -202,7 +227,7 @@ class LockIn(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
         self.state = LockinState()
-        self._log = logging.getLogger(f"slevobot.cogs.lockin")
+        self._log = logging.getLogger("slevobot.cogs.lockin")
 
     async def _restore_role_after_timeout(
         self,
@@ -381,11 +406,13 @@ class LockIn(commands.Cog):
     @app_commands.checks.bot_has_permissions(manage_roles=True, moderate_members=True)
     @app_commands.check(lambda inter: getattr(inter.user, "guild_permissions", None) and inter.user.guild_permissions.administrator)
     @app_commands.default_permissions(administrator=True)
+    @app_commands.autocomplete(member_id=_member_autocomplete)
     @app_commands.guild_only()
-    async def remove(self, interaction: discord.Interaction, member: discord.Member) -> None:
+    async def remove(self, interaction: discord.Interaction, member_id: str) -> None:
         # runtime admin check to avoid app_commands check raising and sending automatic errors
         member_user = interaction.user
         await interaction.response.defer(thinking=True)
+        member = await interaction.guild.fetch_member(member_id)
         if not isinstance(member_user, discord.Member):
             member_user = interaction.guild.get_member(interaction.user.id)
             if member_user is None:
@@ -500,7 +527,7 @@ class LockIn(commands.Cog):
             return
 
         if await self.state.has_entry(interaction.guild.id, member.id):
-            await interaction.followup.send(f"{member_mention} je už zamčený dovnitř!. 🐐", allowed_mentions=no_ping_mentions, ephemeral=True)
+            await interaction.followup.send(f"{member_mention} je už zamčený dovnitř! 🐐", allowed_mentions=no_ping_mentions, ephemeral=True)
             return
 
         # cancel any existing pending restore for that member
