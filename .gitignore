@@ -4,3 +4,4 @@
 __pycache__
 cogs/lockin_state.json
 /logs
+.vscode
