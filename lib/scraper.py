@@ -2,7 +2,9 @@ import requests
 from bs4 import BeautifulSoup
 from typing import TypeAlias, Literal, TypedDict
 from datetime import datetime
+from cachetools.func import ttl_cache
 import re
+
 
 class Product(TypedDict):
     nazev: str
@@ -58,7 +60,7 @@ class Scraper:
                 if price_tag
                 else "neuvedeno"
             )
-            discount_amount_tag = row.find("div",class_="discount_amount")
+            discount_amount_tag = row.find("div", class_="discount_amount")
             if discount_amount_tag:
                 cena = f"{cena} {discount_amount_tag.get_text(strip=True)}"
 
@@ -148,10 +150,9 @@ class Scraper:
                     if price_tag
                     else "neuvedeno"
                 )
-                discount_amount_tag = row.find("div",class_="discount_amount")
+                discount_amount_tag = row.find("div", class_="discount_amount")
                 if discount_amount_tag:
                     cena = f"{cena} {discount_amount_tag.get_text(strip=True)}"
-                
 
                 pct_tag = row.find("div", class_="discount_percentage")
                 sleva = pct_tag.get_text(strip=True).replace(
@@ -202,6 +203,7 @@ class Scraper:
 
         return vysledky
 
+    @ttl_cache(ttl=3600)
     def scrape(self, url: str | bytes) -> ScrapedProducts:
         match url:
             case _ if "www.kupi.cz/slevy" in url:
