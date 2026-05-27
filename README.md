@@ -55,6 +55,12 @@ Discord bot v Pythonu pro trackování slev, dluhů přes API a lockin Discord c
 **Výpis logů bota**
 - `/logs` - vrátí posledních N řádků logu, admin-only.
 
+### 🌐Socials
+**Automaticky upravuje odkazy ze sociálních sítí**
+- Přepisuje odkazy z Instagramu, X a TikToku na alternativní embed-friendly domény.
+- U původní zprávy potlačí embed a pošle upravený odkaz jako odpověď.
+- Funguje automaticky bez další konfigurace.
+
 ## 📚 Požadavky
 
 - Python 3.12.3 nebo novější kompatibilní verze.
@@ -105,5 +111,6 @@ uv run python bot.py
 - `cogs/dluhy.py` - příkazy pro dluhy
 - `cogs/lockin.py` - lockin režim
 - `cogs/logger.py` - výpis logů
+- `cogs/socials.py` - automatická úprava odkazů ze sociálních sítí
 - `cogs/sync.py` - sync a unsync slash commandů
 - `lib/scraper.py` - scraper pro kupi.cz
