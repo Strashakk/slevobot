@@ -570,7 +570,7 @@ class LockIn(commands.Cog):
         no_ping_mentions = discord.AllowedMentions(
             users=False, roles=False, everyone=False)
         if not guild:
-            await interaction.followup.send("No guild found.")
+            await interaction.followup.send("Nepodařilo se najít server.", ephemeral=True)
             return
         state = await self.state.load_state()
         entries = [s for s in state if s["guild_id"] == guild.id]
