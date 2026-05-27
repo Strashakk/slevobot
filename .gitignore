@@ -2,3 +2,5 @@
 *.pyc
 .venv
 __pycache__
+cogs/lockin_state.json
+/logs

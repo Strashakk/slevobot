@@ -1,0 +1,21 @@
+[project]
+name = "slevobot"
+version = "0.1.0"
+description = "Discord bot pro scrapování cen vybraných artiklů"
+readme = "README.md"
+requires-python = ">=3.12.3"
+dependencies = [
+    "babel==2.16.0",
+    "beautifulsoup4==4.14.3",
+    "cachetools>=7.1.4",
+    "discord-py==2.7.1",
+    "python-dotenv==1.2.2",
+    "requests==2.33.1",
+]
+
+[dependency-groups]
+dev = [
+    "mypy>=2.1.0",
+    "ruff>=0.15.14",
+    "types-requests>=2.33.0.20260518",
+]
