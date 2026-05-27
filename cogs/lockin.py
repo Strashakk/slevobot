@@ -204,7 +204,6 @@ class LockIn(commands.Cog):
         self.state = LockinState()
         self._log = logging.getLogger(f"slevobot.cogs.lockin")
 
-
     async def _restore_role_after_timeout(
         self,
         guild_id: int,
@@ -295,7 +294,8 @@ class LockIn(commands.Cog):
                 removed_ids = []
         # log what we tried to remove
         try:
-            self._log.info("_start_lockin_for_member: invoker=%s target=%s removed_ids=%s", getattr(invoker, 'id', invoker), getattr(target, 'id', None), removed_ids)
+            self._log.info("_start_lockin_for_member: invoker=%s target=%s removed_ids=%s", getattr(
+                invoker, 'id', invoker), getattr(target, 'id', None), removed_ids)
         except Exception:
             pass
         # Always attempt to apply a timeout (works as a pure timeout even if no roles were removable)
@@ -307,7 +307,8 @@ class LockIn(commands.Cog):
             timeout_notice = " I could not apply the timeout (missing perms or API error)."
         else:
             try:
-                self._log.info("_start_lockin_for_member: timeout_applied invoker=%s target=%s seconds=%s", getattr(invoker, 'id', invoker), getattr(target, 'id', None), restore_delay_seconds)
+                self._log.info("_start_lockin_for_member: timeout_applied invoker=%s target=%s seconds=%s", getattr(
+                    invoker, 'id', invoker), getattr(target, 'id', None), restore_delay_seconds)
             except Exception:
                 pass
 
@@ -334,11 +335,11 @@ class LockIn(commands.Cog):
         duration: str,
     ) -> None:
         member = interaction.user
-
+        await interaction.response.defer(thinking=True)
         try:
             restore_delay_seconds = self._parse_duration(duration)
         except ValueError:
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 "Špatná doba trvání! Zkus např. 8h, 1d, 1w (maximum 4 týdny)",
                 ephemeral=True,
             )
@@ -349,12 +350,12 @@ class LockIn(commands.Cog):
                 interaction.guild, member, restore_delay_seconds, interaction.user
             )
         except RuntimeError as e:
-            await interaction.response.send_message(str(e), ephemeral=True)
+            await interaction.followup.send(str(e), ephemeral=True)
             return
 
         # If we neither removed roles nor applied a timeout, treat as error
         if not removed_ids and timeout_notice:
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 "Žádné odstranitelné role nebyly nalezeny, nebo jejich odstranění selhalo.",
                 ephemeral=True,
             )
@@ -366,7 +367,7 @@ class LockIn(commands.Cog):
         no_ping_mentions = discord.AllowedMentions(
             users=False, roles=False, everyone=False)
         member_mention = member.mention
-        await interaction.response.send_message(
+        await interaction.followup.send(
             f"{member_mention} se zamknul dovnitř do "
             + discord.utils.format_dt(restore_time, style="F")
             + " ("
@@ -384,6 +385,7 @@ class LockIn(commands.Cog):
     async def remove(self, interaction: discord.Interaction, member: discord.Member) -> None:
         # runtime admin check to avoid app_commands check raising and sending automatic errors
         member_user = interaction.user
+        await interaction.response.defer(thinking=True)
         if not isinstance(member_user, discord.Member):
             member_user = interaction.guild.get_member(interaction.user.id)
             if member_user is None:
@@ -391,13 +393,15 @@ class LockIn(commands.Cog):
                     member_user = await interaction.guild.fetch_member(interaction.user.id)
                 except Exception:
                     member_user = None
-        is_admin = bool(member_user and getattr(member_user, 'guild_permissions', None) and member_user.guild_permissions.administrator)
+        is_admin = bool(member_user and getattr(
+            member_user, 'guild_permissions', None) and member_user.guild_permissions.administrator)
         try:
-            self._log.info("lockin.remove invoked by id=%s name=%s is_admin=%s target=%s", interaction.user.id, getattr(interaction.user, 'name', None), is_admin, getattr(member, 'id', None))
+            self._log.info("lockin.remove invoked by id=%s name=%s is_admin=%s target=%s", interaction.user.id, getattr(
+                interaction.user, 'name', None), is_admin, getattr(member, 'id', None))
         except Exception:
             pass
         if not is_admin:
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 "Nemáš oprávnění — pouze administrátoři mohou použít tento příkaz.",
                 ephemeral=True,
             )
@@ -448,9 +452,9 @@ class LockIn(commands.Cog):
         has_error = any(part.startswith("Could not") for part in note_parts)
 
         if has_error:
-            await interaction.response.send_message("; ".join(note_parts), ephemeral=True)
+            await interaction.followup.send("; ".join(note_parts), ephemeral=True)
         else:
-            await interaction.response.send_message(f"{member_mention} byl odemčen ven", allowed_mentions=no_ping_mentions)
+            await interaction.followup.send(f"{member_mention} byl odemčen ven", allowed_mentions=no_ping_mentions)
 
     @app_commands.command(name="lockin_apply", description="👑🔐Admin: Zamkni dovnitř jiného uživatele")
     @app_commands.describe(duration="Po jakou dobu odebrat role? Např. 8h, 1d, 1w (maximum 4 týdny)")
@@ -461,6 +465,7 @@ class LockIn(commands.Cog):
     async def apply(self, interaction: discord.Interaction, member: discord.Member, duration: str = '8h') -> None:
         # runtime admin check
         member_user = interaction.user
+        await interaction.response.defer(thinking=True)
         if not isinstance(member_user, discord.Member):
             member_user = interaction.guild.get_member(interaction.user.id)
             if member_user is None:
@@ -468,13 +473,15 @@ class LockIn(commands.Cog):
                     member_user = await interaction.guild.fetch_member(interaction.user.id)
                 except Exception:
                     member_user = None
-        is_admin = bool(member_user and getattr(member_user, 'guild_permissions', None) and member_user.guild_permissions.administrator)
+        is_admin = bool(member_user and getattr(
+            member_user, 'guild_permissions', None) and member_user.guild_permissions.administrator)
         try:
-            self._log.info("lockin.apply invoked by id=%s name=%s is_admin=%s target=%s duration=%s", interaction.user.id, getattr(interaction.user, 'name', None), is_admin, getattr(member, 'id', None), duration)
+            self._log.info("lockin.apply invoked by id=%s name=%s is_admin=%s target=%s duration=%s", interaction.user.id, getattr(
+                interaction.user, 'name', None), is_admin, getattr(member, 'id', None), duration)
         except Exception:
             pass
         if not is_admin:
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 "Nemáš oprávnění — pouze administrátoři mohou použít tento příkaz.",
                 ephemeral=True,
             )
@@ -486,14 +493,14 @@ class LockIn(commands.Cog):
         try:
             restore_delay_seconds = self._parse_duration(duration)
         except ValueError:
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 "Špatná doba trvání! Zkus např. 8h, 1d, 1w (maximum 4 týdny)",
                 ephemeral=True,
             )
             return
 
         if await self.state.has_entry(interaction.guild.id, member.id):
-            await interaction.response.send_message(f"{member_mention} je už zamčený dovnitř!. 🐐", allowed_mentions=no_ping_mentions, ephemeral=True)
+            await interaction.followup.send(f"{member_mention} je už zamčený dovnitř!. 🐐", allowed_mentions=no_ping_mentions, ephemeral=True)
             return
 
         # cancel any existing pending restore for that member
@@ -504,13 +511,13 @@ class LockIn(commands.Cog):
                 interaction.guild, member, restore_delay_seconds, interaction.user
             )
         except RuntimeError as e:
-            await interaction.response.send_message(str(e), ephemeral=True)
+            await interaction.followup.send(str(e), ephemeral=True)
             return
         # Success (roles removed or timeout applied)
         restore_at = int(time() + restore_delay_seconds)
         restore_time = datetime.datetime.fromtimestamp(
             restore_at, tz=datetime.timezone.utc)
-        await interaction.response.send_message(
+        await interaction.followup.send(
             f"{member_mention} byl zamčen dovnitř do "
             + discord.utils.format_dt(restore_time, style="F")
             + " ("
