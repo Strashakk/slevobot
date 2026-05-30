@@ -1,45 +1,52 @@
 import discord
 from discord.ext import commands
-from re import findall
+import re
 
 
 class Socials(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.translations: dict[str, str] = \
-            {
-            "instagram.com": "kkinstagram.com",
-            "x.com": "fixupx.com",
-            "tiktok.com": "tnktok.com",
-        }
+        self.translations = [
+            (re.compile(
+                r"https://(?:www\.)?instagram\.com/reels/"),
+                r"https://www.kkinstagram.com/reels/"),
+            (re.compile(
+                r"https://(?:www\.)?instagram\.com/p/"),
+                r"https://www.kkinstagram.com/p/"),
+            (re.compile(
+                r"https://(?:www\.)?(?:x|twitter)\.com/([^/]+)/status/(\d+)"), 
+                r"https://fixupx.com/\1/status/\2"),
+            (re.compile(
+                r"https://(?:[a-zA-Z0-9-]+\.)?tiktok\.com/"), 
+                r"https://tnktok.com/"),
+        ]
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
         if message.author.bot:
             return
 
-        matches: list[str] = findall(
+        matches: list[str] = re.findall(
             r'(https?://[^\s]+)', message.content)
         supressed = False
         if len(matches) > 0:
-            # Suppress embeds from original message
 
             for url in matches:
-                for key in list(self.translations.keys()):
-                    if key in url:
-                        if supressed:
+                for pattern, replacement in self.translations:
+                    if pattern.search(url):
+                        if not supressed:
+                            # Suppress embeds from original message     
                             await message.edit(suppress=True)
                             supressed = True
-                        # Replace url with better embed
-                        newMessage = url.replace(
-                            key, self.translations[key])
                         # Remove query parameters
-                        queryIndex = newMessage.find("?")
-                        if queryIndex != -1:
-                            newMessage = newMessage[:queryIndex]
+                        query_index = url.find("?")
+                        if query_index != -1:
+                            url = url[:query_index]
+                        # Replace url with better embed
+                        new_message = pattern.sub(replacement, url)
                         # Send message
                         await message.reply(
-                            f"{newMessage}",
+                            f"{new_message}",
                             mention_author=False
                         )
                         break
