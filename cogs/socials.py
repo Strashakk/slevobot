@@ -11,6 +11,9 @@ class Socials(commands.Cog):
                 r"https://(?:www\.)?instagram\.com/reels/"),
                 r"https://www.kkinstagram.com/reels/"),
             (re.compile(
+                r"https://(?:www\.)?instagram\.com/reel/"),
+                r"https://www.kkinstagram.com/reel/"),
+            (re.compile(
                 r"https://(?:www\.)?instagram\.com/p/"),
                 r"https://www.kkinstagram.com/p/"),
             (re.compile(
