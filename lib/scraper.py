@@ -9,7 +9,7 @@ import re
 class Product(TypedDict):
     name: str
     price: str
-    unit_price: float
+    unit_price: float | None
     discount: str
     validity: str
 
@@ -103,10 +103,14 @@ class Scraper:
                 if end_date < today:
                     continue
 
-            price_per_unit = row.find(
-                "span", class_="price_per_unit").get_text()
-            unit_price = float(price_per_unit.strip().split(
-                "\xa0")[0].replace(",", "."))
+            unit_price = None
+            try: 
+                price_per_unit = row.find(
+                    "span", class_="price_per_unit").get_text()
+                unit_price = float(price_per_unit.strip().split(
+                    "\xa0")[0].replace(",", "."))
+            except ValueError:
+                pass
 
             vysledky.append(
                 {
@@ -198,11 +202,15 @@ class Scraper:
                             continue
                     if end_date < today:
                         continue
-
-                price_per_unit = row.find(
-                    "span", class_="price_per_unit").get_text()
-                unit_price = float(price_per_unit.strip().split(
-                    "\xa0")[0].replace(",", "."))
+                        
+                unit_price = None
+                try: 
+                    price_per_unit = row.find(
+                        "span", class_="price_per_unit").get_text()
+                    unit_price = float(price_per_unit.strip().split(
+                        "\xa0")[0].replace(",", "."))
+                except ValueError:
+                    pass
 
                 vysledky.append(
                     {
