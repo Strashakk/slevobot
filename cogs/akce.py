@@ -17,8 +17,8 @@ class Akce(commands.Cog):
 
     @staticmethod
     def _build_message(title: str, emoji: str, vysledky: ScrapedProducts) -> str:
-        vysledky.sort(key=lambda x: x["unit_price"] if x["unit_price"] is not None else float("inf"))
-        zprava = f"{emoji} **{title} - {"nalezeno" if len(vysledky) != 1 else "nalezena"} {len(vysledky)} {"akcí" if len(vysledky) != 1 else "akce"}:**\n"
+        vysledky = sorted(vysledky, key=lambda x: x["unit_price"] if x["unit_price"] is not None else float("inf"))
+        zprava = f"{emoji} **{title} - {'nalezeno' if len(vysledky) != 1 else 'nalezena'} {len(vysledky)} {'akcí' if len(vysledky) != 1 else 'akce'}:**\n"
         for i, v in enumerate(vysledky, 1):
             zprava += (
                 f"**{i}. {v['name']}**"

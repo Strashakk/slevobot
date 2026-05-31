@@ -201,7 +201,7 @@ class Scraper:
                             continue
                     if end_date < today:
                         continue
-                        
+
                 unit_price = None
                 price_per_unit_tag = row.find("span", class_="price_per_unit")
                 if price_per_unit_tag:
