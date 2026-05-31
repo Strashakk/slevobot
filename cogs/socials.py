@@ -22,6 +22,9 @@ class Socials(commands.Cog):
             (re.compile(
                 r"https://(?:[a-zA-Z0-9-]+\.)?tiktok\.com/"), 
                 r"https://tnktok.com/"),
+            (re.compile(
+                r"https://(?:www\.|old\.)?reddit\.com/(r/[^/]+/comments/\S+)"), 
+                r"https://vxreddit.com/\1"),
         ]
 
     @commands.Cog.listener()
