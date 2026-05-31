@@ -11,6 +11,9 @@ class Socials(commands.Cog):
                 r"https://(?:www\.)?instagram\.com/reels/"),
                 r"https://www.kkinstagram.com/reels/"),
             (re.compile(
+                r"https://(?:www\.)?instagram\.com/reel/"),
+                r"https://www.kkinstagram.com/reel/"),
+            (re.compile(
                 r"https://(?:www\.)?instagram\.com/p/"),
                 r"https://www.kkinstagram.com/p/"),
             (re.compile(
@@ -19,6 +22,9 @@ class Socials(commands.Cog):
             (re.compile(
                 r"https://(?:[a-zA-Z0-9-]+\.)?tiktok\.com/"), 
                 r"https://tnktok.com/"),
+            (re.compile(
+                r"https://(?:www\.|old\.)?reddit\.com/(r/[^/]+/comments/\S+)"), 
+                r"https://vxreddit.com/\1"),
         ]
 
     @commands.Cog.listener()
