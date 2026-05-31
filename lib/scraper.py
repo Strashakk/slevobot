@@ -7,10 +7,11 @@ import re
 
 
 class Product(TypedDict):
-    nazev: str
-    cena: str
-    sleva: str
-    platnost: str
+    name: str
+    price: str
+    unit_price: float
+    discount: str
+    validity: str
 
 
 ScrapedProducts: TypeAlias = list[Product]
@@ -38,7 +39,7 @@ class Scraper:
         discount_rows = soup.find_all("div", class_="discount_row")
 
         seen_ids = set()
-        vysledky = []
+        vysledky: ScrapedProducts = []
 
         for row in discount_rows:
             discount_id = row.get("id", "")
@@ -102,12 +103,18 @@ class Scraper:
                 if end_date < today:
                     continue
 
+            price_per_unit = row.find(
+                "span", class_="price_per_unit").get_text()
+            unit_price = float(price_per_unit.strip().split(
+                "\xa0")[0].replace(",", "."))
+
             vysledky.append(
                 {
-                    "nazev": nazev,
-                    "cena": cena,
-                    "sleva": sleva,
-                    "platnost": platnost,
+                    "name": nazev,
+                    "price": cena,
+                    "discount": sleva,
+                    "validity": platnost,
+                    "unit_price": unit_price
                 }
             )
 
@@ -122,7 +129,7 @@ class Scraper:
         group_rows = soup.find_all("div", class_="group_discounts")
 
         seen_ids = set()
-        vysledky = []
+        vysledky: ScrapedProducts = []
         for group in group_rows:
             group_name_tag = group.find("a", class_="product_link_history")
             img_tag = group_name_tag.find("img") if group_name_tag else None
@@ -192,12 +199,18 @@ class Scraper:
                     if end_date < today:
                         continue
 
+                price_per_unit = row.find(
+                    "span", class_="price_per_unit").get_text()
+                unit_price = float(price_per_unit.strip().split(
+                    "\xa0")[0].replace(",", "."))
+
                 vysledky.append(
                     {
-                        "nazev": nazev,
-                        "cena": cena,
-                        "sleva": sleva,
-                        "platnost": platnost,
+                        "name": nazev,
+                        "price": cena,
+                        "discount": sleva,
+                        "validity": platnost,
+                        "unit_price": unit_price
                     }
                 )
 
