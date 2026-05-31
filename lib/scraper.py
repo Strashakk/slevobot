@@ -104,13 +104,12 @@ class Scraper:
                     continue
 
             unit_price = None
-            try: 
-                price_per_unit = row.find(
-                    "span", class_="price_per_unit").get_text()
-                unit_price = float(price_per_unit.strip().split(
-                    "\xa0")[0].replace(",", "."))
-            except ValueError:
-                pass
+            price_per_unit_tag = row.find("span", class_="price_per_unit")
+            if price_per_unit_tag:
+                try:
+                    unit_price = float(price_per_unit_tag.get_text().strip().split("\xa0")[0].replace(",", "."))
+                except ValueError:
+                    pass
 
             vysledky.append(
                 {
