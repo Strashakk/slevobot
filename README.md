@@ -50,6 +50,7 @@ Discord bot v Pythonu pro trackování slev, dluhů přes API a lockin Discord c
 - `/lockin` - zamkne uživatele po daný čas.
 - `/lockin_remove` - Admin příkaz pro předčasné zrušení lockinu.
 - `/lockin_apply` - Admin příkaz pro zamknutí jiného uživatele.
+- `/lockin_list` - Zobrazí seznam zamčených lidí
 
 ### 📑Logy
 **Výpis logů bota**
