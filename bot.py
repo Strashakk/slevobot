@@ -12,6 +12,7 @@ load_dotenv()
 # Inicializace bota a nastavení práv pro čtení zpráv
 intents = discord.Intents.default()
 intents.message_content = True
+intents.members = True
 
 
 class Slevobot(commands.Bot):
@@ -22,6 +23,7 @@ class Slevobot(commands.Bot):
         await self.load_extension('cogs.lockin')
         await self.load_extension('cogs.logger')
         await self.load_extension('cogs.socials')
+        await self.load_extension('cogs.role_keeper')
 
 
 def configure_logging() -> Path:
