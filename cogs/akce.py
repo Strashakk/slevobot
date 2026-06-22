@@ -17,12 +17,13 @@ class Akce(commands.Cog):
 
     @staticmethod
     def _build_message(title: str, emoji: str, vysledky: ScrapedProducts) -> str:
-        zprava = f"{emoji} **{title} - {"nalezeno" if len(vysledky) != 1 else "nalezena"} {len(vysledky)} {"akcí" if len(vysledky) != 1 else "akce"}:**\n"
+        vysledky = sorted(vysledky, key=lambda x: x["unit_price"] if x["unit_price"] is not None else float("inf"))
+        zprava = f"{emoji} **{title} - {'nalezeno' if len(vysledky) != 1 else 'nalezena'} {len(vysledky)} {'akcí' if len(vysledky) != 1 else 'akce'}:**\n"
         for i, v in enumerate(vysledky, 1):
             zprava += (
-                f"**{i}. {v['nazev']}**"
-                f"   💰 Cena: **{v['cena']}** {v['sleva']}\n"
-                f"   📅 Platnost: {v['platnost']}\n\n"
+                f"**{i}. {v['name']}**"
+                f"   💰 Cena: **{v['price']}** {v['discount']}\n"
+                f"   📅 Platnost: {v['validity']}\n\n"
             )
         return zprava
 
@@ -39,7 +40,7 @@ class Akce(commands.Cog):
             vysledky = self.scraper.scrape(url)
             if filter_:
                 vysledky = list(
-                    filter(lambda x: whitelist if (re.search(filter_, x["nazev"]) is not None or re.search(filter_, x["cena"]) is not None) else not whitelist, vysledky))
+                    filter(lambda x: whitelist if (re.search(filter_, x["name"]) is not None or re.search(filter_, x["price"]) is not None) else not whitelist, vysledky))
             if vysledky:
                 meowssage = self._build_message(title, emoji, vysledky)
 
@@ -57,7 +58,7 @@ class Akce(commands.Cog):
             vysledky = self.scraper.scrape(url)
             if filter_:
                 vysledky = list(
-                    filter(lambda x: whitelist if (re.search(filter_, x["nazev"]) is not None or re.search(filter_, x["cena"]) is not None) else not whitelist, vysledky))
+                    filter(lambda x: whitelist if (re.search(filter_, x["name"]) is not None or re.search(filter_, x["price"]) is not None) else not whitelist, vysledky))
             if not vysledky:
                 await ctx.send(empty_text)
                 return
@@ -160,9 +161,9 @@ class Akce(commands.Cog):
             error_text="Došlo k chybě při stahování akcí na Pepsi",
             url="https://www.kupi.cz/sleva/limonada-pepsi",
             emoji="🍹",
-            filter_ = r"2([,.]\d+)?\s*l"
-        ) 
-    
+            filter_=r"2([,.]\d+)?\s*l"
+        )
+
     @app_commands.command(name="kofola", description="Najde slevy na limonádu Kofola")
     async def kofola(self, interaction: discord.Interaction) -> None:
         await self._send_discounts(
@@ -172,5 +173,5 @@ class Akce(commands.Cog):
             error_text="Došlo k chybě při stahování akcí na Kofolu",
             url="https://www.kupi.cz/sleva/kofola",
             emoji="🍹",
-            filter_ = r"2([,.]\d+)?\s*l"
+            filter_=r"2([,.]\d+)?\s*l"
         )
