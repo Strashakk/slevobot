@@ -76,7 +76,7 @@ class Zhrnuti(commands.Cog):
     async def zhrnuti(
         self,
         interaction: discord.Interaction,
-        pocet_zprav: app_commands.Range[int, 5, 20000] = 25,
+        pocet_zprav: int = 25,
     ) -> None:
         await interaction.response.defer(thinking=True)
 
@@ -86,7 +86,7 @@ class Zhrnuti(commands.Cog):
             return
 
         fetched_messages: list[discord.Message] = []
-        fetch_limit = min(pocet_zprav * 4, 20000)
+        fetch_limit = None
         async for message in channel.history(limit=fetch_limit):
             if message.author.bot:
                 continue
