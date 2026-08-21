@@ -66,6 +66,9 @@ Discord bot v Pythonu pro trackování slev, dluhů přes API a lockin Discord c
 - U původní zprávy potlačí embed a pošle upravený odkaz jako odpověď.
 - Funguje automaticky bez další konfigurace.
 
+### Reakce
+- při 5 📌 reakcích připne zprávu v kanálu.
+
 ## 📚 Požadavky
 
 - Python 3.12.3 nebo novější kompatibilní verze.
@@ -120,6 +123,7 @@ uv run python bot.py
 - `cogs/dluhy.py` - příkazy pro dluhy
 - `cogs/lockin.py` - lockin režim
 - `cogs/logger.py` - výpis logů
+- `cogs/pin.py` - připínání zpráv uživateli
 - `cogs/zhrnuti.py` - shrnutí posledních zpráv v kanálu
 - `cogs/socials.py` - automatická úprava odkazů ze sociálních sítí
 - `cogs/sync.py` - sync a unsync slash commandů
