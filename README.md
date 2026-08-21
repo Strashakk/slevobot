@@ -56,6 +56,10 @@ Discord bot v Pythonu pro trackování slev, dluhů přes API a lockin Discord c
 **Výpis logů bota**
 - `/logs` - vrátí posledních N řádků logu, admin-only.
 
+### 📝Shrnutí chatu
+**Shrnutí posledních zpráv v aktuálním kanálu**
+- `/zhrnuti [pocet_zprav]` - shrne posledních X textových zpráv od uživatelů (bez botů).
+
 ### 🌐Socials
 **Automaticky upravuje odkazy ze sociálních sítí**
 - Přepisuje odkazy z Instagramu, X a TikToku na alternativní embed-friendly domény.
@@ -77,6 +81,10 @@ Vytvoř soubor `.env` v rootu repa a doplň do něj alespoň token:
 DISCORD_TOKEN=TVUJ_TOKEN
 HOME_CHANNEL_ID=123456789012345678
 DISCORD_GUILD_ID=123456789012345678
+OPENAI_API_KEY=sk-...
+OPENAI_MODEL=gpt-4o-mini
+# volitelné (výchozí je OpenAI endpoint):
+# AI_SUMMARY_API_URL=https://api.openai.com/v1/chat/completions
 ```
 
 `HOME_CHANNEL_ID` a `DISCORD_GUILD_ID` jsou volitelné. Pokud je `HOME_CHANNEL_ID` nastavený, bot po startu pošle zprávu do daného kanálu. `DISCORD_GUILD_ID` se používá pro rychlejší sync slash commandů, není však potřeba.
@@ -112,6 +120,7 @@ uv run python bot.py
 - `cogs/dluhy.py` - příkazy pro dluhy
 - `cogs/lockin.py` - lockin režim
 - `cogs/logger.py` - výpis logů
+- `cogs/zhrnuti.py` - shrnutí posledních zpráv v kanálu
 - `cogs/socials.py` - automatická úprava odkazů ze sociálních sítí
 - `cogs/sync.py` - sync a unsync slash commandů
 - `lib/scraper.py` - scraper pro kupi.cz
