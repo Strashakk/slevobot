@@ -44,7 +44,8 @@ class Zhrnuti(commands.Cog):
                     "role": "user",
                     "content": (
                         "Vytvoř krátké shrnutí hlavních témat této konverzace. "
-                        "Maximálně 6 bodů, bez omáčky.\n\n"
+                        "Ideálně 6 středně dlouhých bodů, klidně méně, je-li potřeba opravdu popsat více témat, můžeš použít více, bez omáčky, taky napiš jaký uživatel danou věc řekl. Můžeš použít přesné citace. Například : ,, Strashakk napsal že je frajer ''\n\n"
+                        "Můžeš používat emoji, odkazy nepřeposílej, nepoužívej tagování uživatelů.\n\n"
                         f"{transcript}"
                     ),
                 },
@@ -75,7 +76,7 @@ class Zhrnuti(commands.Cog):
     async def zhrnuti(
         self,
         interaction: discord.Interaction,
-        pocet_zprav: app_commands.Range[int, 5, 100] = 25,
+        pocet_zprav: app_commands.Range[int, 5, 20000] = 25,
     ) -> None:
         await interaction.response.defer(thinking=True)
 
@@ -85,7 +86,7 @@ class Zhrnuti(commands.Cog):
             return
 
         fetched_messages: list[discord.Message] = []
-        fetch_limit = min(pocet_zprav * 4, 400)
+        fetch_limit = min(pocet_zprav * 4, 20000)
         async for message in channel.history(limit=fetch_limit):
             if message.author.bot:
                 continue
