@@ -7,6 +7,7 @@ Discord bot v Pythonu pro trackování slev, dluhů přes API a lockin Discord c
 - Vyhledává akce na [kupi.cz](https://www.kupi.cz) pro vybrané produkty (Řízky, vajíčka, mleté, monstery..).
 - Zobrazuje všechny dluhy v Flowernal API.
 - Dočasný "lockin" na Discordu - timeout a odstranění rolí.
+- Fetak - AI vyhodnocení, jestli uživatel nemluví o touze si dát drogy, a případný hodinový timeout.
 - Výpis logů na Discord pomocí příkazu.
 
 ## 🌟Hvězdná historie
@@ -59,6 +60,11 @@ Discord bot v Pythonu pro trackování slev, dluhů přes API a lockin Discord c
 ### 📝Shrnutí chatu
 **Shrnutí posledních zpráv v aktuálním kanálu**
 - `/zhrnuti [pocet_zprav]` - shrne posledních X textových zpráv od uživatelů (bez botů).
+
+### 🧪Fetak
+**Vyhodnocení, jestli se uživatel nebaví o drogách**
+- `/fetak [user]` - projede poslední hodinu zpráv uživatele a přes AI vyhodnotí, jestli se bavil o drogách. Pokud ano, dostane hodinový timeout.
+  - `user` je **volitelný** – pokud se nezadá, kontroluje se defaultní uživatel (id `279344155149467648`).
 
 ### 🌐Socials
 **Automaticky upravuje odkazy ze sociálních sítí**
@@ -125,6 +131,7 @@ uv run python bot.py
 - `cogs/logger.py` - výpis logů
 - `cogs/pin.py` - připínání zpráv uživateli
 - `cogs/zhrnuti.py` - shrnutí posledních zpráv v kanálu
+- `cogs/fetak.py` - AI vyhodnocení tématu drog/fetu u uživatele + hodinový timeout
 - `cogs/socials.py` - automatická úprava odkazů ze sociálních sítí
 - `cogs/sync.py` - sync a unsync slash commandů
 - `lib/scraper.py` - scraper pro kupi.cz
