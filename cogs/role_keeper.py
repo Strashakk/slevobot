@@ -1,3 +1,4 @@
+import asyncio
 import json
 import logging
 from pathlib import Path
@@ -18,8 +19,8 @@ class Entry(TypedDict):
 class RoleKeeper(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
-        self._log = logging.getLogger("slevobot.cogs.lockin")
-
+        self._log = logging.getLogger("slevobot.cogs.role_keeper")
+        self._state_lock = asyncio.Lock()
     @staticmethod
     def save(entry: Entry) -> None:
         entries: list[Entry] = [
