@@ -22,9 +22,9 @@ class Slevobot(commands.Bot):
         await self.load_extension('cogs.sync')
         await self.load_extension('cogs.lockin')
         await self.load_extension('cogs.logger')
-        await self.load_extension('cogs.socials')
+        # await self.load_extension('cogs.socials')
         await self.load_extension('cogs.pin')
-        await self.load_extension('cogs.zhrnuti')
+        # await self.load_extension('cogs.zhrnuti')
 
 
 def configure_logging() -> Path:
