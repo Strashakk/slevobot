@@ -6,6 +6,9 @@ import logging
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
+from lib.db import get_cog_by_module
+from lib.db import sync_cogs_from_bot
+
 load_dotenv()
 
 
@@ -16,15 +19,23 @@ intents.reactions = True
 
 
 class Slevobot(commands.Bot):
+    startup_message_sent = False
+
     async def setup_hook(self) -> None:
-        await self.load_extension('cogs.dluhy')
-        await self.load_extension('cogs.akce')
-        await self.load_extension('cogs.sync')
-        await self.load_extension('cogs.lockin')
-        await self.load_extension('cogs.logger')
-        # await self.load_extension('cogs.socials')
-        await self.load_extension('cogs.pin')
-        # await self.load_extension('cogs.zhrnuti')
+        cogs_dir = Path(__file__).resolve().parent / "cogs"
+        extension_names = sorted(
+            f"cogs.{path.stem}"
+            for path in cogs_dir.glob("*.py")
+            if path.stem != "cog_toggle"
+        )
+
+        for extension_name in extension_names:
+            stored_cog = await get_cog_by_module(extension_name)
+            if stored_cog is None or stored_cog.enabled:
+                await self.load_extension(extension_name)
+
+        await self.load_extension('cogs.cog_toggle')
+        await sync_cogs_from_bot(self, excluded_modules={"cogs.cog_toggle"})
 
 
 def configure_logging() -> Path:
@@ -65,22 +76,23 @@ startup_message_sent = False
 
 @bot.event
 async def on_ready() -> None:
-    global startup_message_sent
-    logging.log(logging.INFO, f'Bot {bot.user} byl úspěšně spuštěn!')
+    logging.info("Bot %s byl úspěšně spuštěn!", bot.user)
 
-    if startup_message_sent:
+    if bot.startup_message_sent:
         return
 
-    startup_message_sent = True
+    bot.startup_message_sent = True
 
     channel_id = os.getenv("HOME_CHANNEL_ID")
     if not channel_id or not channel_id.strip():
-        logging.warning('HOME_CHANNEL_ID není nastavený. Nelze poslat zprávu o spuštění bota.')
+        logging.warning(
+            'HOME_CHANNEL_ID není nastavený. Nelze poslat zprávu o spuštění bota.')
     else:
         try:
             channel_id_int = int(channel_id.strip())
         except (TypeError, ValueError):
-            logging.warning('HOME_CHANNEL_ID má neplatnou hodnotu %r. Nelze poslat zprávu o spuštění bota.', channel_id)
+            logging.warning(
+                'HOME_CHANNEL_ID má neplatnou hodnotu %r. Nelze poslat zprávu o spuštění bota.', channel_id)
         else:
             try:
                 channel = bot.get_channel(channel_id_int) or await bot.fetch_channel(channel_id_int)
@@ -93,11 +105,14 @@ async def on_ready() -> None:
                         type(channel).__name__,
                     )
             except discord.Forbidden:
-                logging.warning('Could not send message to channel %s.', channel_id_int)
+                logging.warning(
+                    'Could not send message to channel %s.', channel_id_int)
             except discord.NotFound:
-                logging.warning('Channel %s does not exist or is not accessible.', channel_id_int)
+                logging.warning(
+                    'Channel %s does not exist or is not accessible.', channel_id_int)
             except discord.HTTPException:
-                logging.exception('Failed to send startup message to channel %s.', channel_id_int)
+                logging.exception(
+                    'Failed to send startup message to channel %s.', channel_id_int)
 
 LOG_PATH = configure_logging()
 if __name__ == "__main__":

@@ -2,6 +2,8 @@ from os import getenv
 from discord.ext import commands
 import discord
 
+from lib.decorators import dev_server_only
+
 
 async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(Sync(bot))
@@ -13,6 +15,14 @@ class Sync(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
 
+    async def cog_command_error(self, ctx: commands.Context, error: commands.CommandError) -> None:
+        if isinstance(error, commands.CheckFailure):
+            await ctx.send("This command is only available on the dev server.")
+            return
+
+        raise error
+
+    @dev_server_only
     @commands.command(name="sync")
     @commands.has_permissions(administrator=True)
     async def sync(self, ctx: commands.Context) -> None:
@@ -45,6 +55,7 @@ class Sync(commands.Cog):
             else:
                 await ctx.send(f"Failed to sync: {e}")
 
+    @dev_server_only
     @commands.command(name="unsync")
     @commands.has_permissions(administrator=True)
     async def unsync(self, ctx: commands.Context) -> None:
