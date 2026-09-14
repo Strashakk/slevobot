@@ -8,6 +8,7 @@ Discord bot v Pythonu pro trackování slev, dluhů přes API a lockin Discord c
 - Zobrazuje všechny dluhy v Flowernal API.
 - Dočasný "lockin" na Discordu - timeout a odstranění rolí.
 - Výpis logů na Discord pomocí příkazu.
+- Sleduje změny aktuálních upozornění na stránkách předmětu TIN (FIT VUT).
 
 ## 🌟Hvězdná historie
 
@@ -72,8 +73,24 @@ Discord bot v Pythonu pro trackování slev, dluhů přes API a lockin Discord c
 - U původní zprávy potlačí embed a pošle upravený odkaz jako odpověď.
 - Funguje automaticky bez další konfigurace.
 
+### 📌 TIN upozornění
+**Automaticky hlídá aktuální upozornění předmětu TIN**
+- Každý den v 9:00 (Europe/Prague) stáhne stránku [TIN](https://www.fit.vut.cz/study/course/TIN/public/) a porovná sekci "Aktuální upozornění" s posledním uloženým stavem.
+- Pokud se obsah změnil, pošle upozornění do přednastaveného kanálu.
+- Změny pouze v HTML komentářích se ignorují, aby nevyvolávaly falešná upozornění.
+- Stav se ukládá do `cogs/tinalert_state.json` (runtime soubor, je v `.gitignore`).
+- Funguje automaticky bez příkazů a konfigurace.
+
 ### Reakce
 - při 5 📌 reakcích připne zprávu v kanálu.
+
+## 🧪 Testy
+
+Testy se spouští přes `pytest`:
+
+```bash
+uv run pytest
+```
 
 ## 📚 Požadavky
 
@@ -136,4 +153,6 @@ uv run python bot.py
 - `cogs/zhrnuti.py` - shrnutí posledních zpráv v kanálu
 - `cogs/socials.py` - automatická úprava odkazů ze sociálních sítí
 - `cogs/sync.py` - sync a unsync slash commandů
+- `cogs/tinalert.py` - hlídání změn upozornění předmětu TIN
 - `lib/scraper.py` - scraper pro kupi.cz
+- `tests/` - testy (pytest) s fixture stránky TIN
