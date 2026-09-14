@@ -25,8 +25,8 @@ Discord bot v Pythonu pro trackování slev, dluhů přes API a lockin Discord c
 ### 🔥✍Textové příkazy
 
 - `!rizky` - slevy na kuřecí prsní řízky, legacy verze commandu pro zachování "running-joku".
-- `!sync` - znovunačte extensiony a synchronizuje slash commandy.
-- `!unsync` - smaže registrované slash commandy.
+- `!sync` - znovunačte extensiony a synchronizuje slash commandy, pouze na dev serveru.
+- `!unsync` - smaže registrované slash commandy, pouze na dev serveru.
 
 ### ⚔ Slash commandy
 💸**Slevové commandy** - vypíší aktuální slevy na dané produkty
@@ -45,6 +45,12 @@ Discord bot v Pythonu pro trackování slev, dluhů přes API a lockin Discord c
 - `/dluhy celkem` - spočítá celkový dluh v Kč.
 - `/dluhy graf` - zobrazí graf dluhů - generovaný přímo API, ne lokálně.
 - `/dluhy zmena` - zobrazí změnu dluhů za zvolené období.
+
+### ⚙️Cog management
+**Správa cogs uložených v databázi**
+- `/cog enable` - zapne vybraný cog, pouze na dev serveru.
+- `/cog disable` - vypne vybraný cog, pouze na dev serveru.
+- `/cog list` - vypíše všechny sledované cogs a jejich stav, pouze na dev serveru.
 
 ### 🔐Lockin
 **"Zamkne dovnitř" uživatele na Discordu**
@@ -90,6 +96,7 @@ uv run pytest
 
 - Python 3.12.3 nebo novější kompatibilní verze.
 - Discord bot token.
+- Pro omezení vybraných příkazů na dev server volitelně `DEV_SERVER`.
 - Pro synchronizaci slash commandů volitelně `DISCORD_GUILD_ID`.
 - Pro startup zprávu volitelně `HOME_CHANNEL_ID`.
 
@@ -99,6 +106,7 @@ Vytvoř soubor `.env` v rootu repa a doplň do něj alespoň token:
 
 ```env
 DISCORD_TOKEN=TVUJ_TOKEN
+DEV_SERVER=123456789012345678
 HOME_CHANNEL_ID=123456789012345678
 DISCORD_GUILD_ID=123456789012345678
 OPENAI_API_KEY=sk-...
@@ -107,7 +115,7 @@ OPENAI_MODEL=gpt-4o-mini
 # AI_SUMMARY_API_URL=https://api.openai.com/v1/chat/completions
 ```
 
-`HOME_CHANNEL_ID` a `DISCORD_GUILD_ID` jsou volitelné. Pokud je `HOME_CHANNEL_ID` nastavený, bot po startu pošle zprávu do daného kanálu. `DISCORD_GUILD_ID` se používá pro rychlejší sync slash commandů, není však potřeba.
+`DEV_SERVER`, `HOME_CHANNEL_ID` a `DISCORD_GUILD_ID` jsou volitelné. Pokud je `DEV_SERVER` nastavený, příkazy `!sync`, `!unsync` a celá skupina `/cog` budou dostupné jen na daném serveru. Pokud je `HOME_CHANNEL_ID` nastavený, bot po startu pošle zprávu do daného kanálu. `DISCORD_GUILD_ID` se používá pro rychlejší sync slash commandů, není však potřeba.
 
 ## 🐋Spuštění přes Docker (**__Doporučeno__**)
 
@@ -141,6 +149,7 @@ uv run python bot.py
 - `cogs/lockin.py` - lockin režim
 - `cogs/logger.py` - výpis logů
 - `cogs/pin.py` - připínání zpráv uživateli
+- `cogs/cog_toggle.py` - správa cogů přes `/cog`
 - `cogs/zhrnuti.py` - shrnutí posledních zpráv v kanálu
 - `cogs/socials.py` - automatická úprava odkazů ze sociálních sítí
 - `cogs/sync.py` - sync a unsync slash commandů

@@ -6,3 +6,4 @@ cogs/lockin_state.json
 cogs/tinalert_state.json
 /logs
 .vscode
+/data
