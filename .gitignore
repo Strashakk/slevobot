@@ -4,5 +4,6 @@
 __pycache__
 cogs/lockin_state.json
 cogs/tinalert_state.json
+/data
 /logs
 .vscode
