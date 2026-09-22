@@ -75,6 +75,13 @@ Discord bot v Pythonu pro trackování slev, dluhů přes API a lockin Discord c
 - Stav se ukládá do `cogs/tinalert_state.json` (runtime soubor, je v `.gitignore`).
 - Funguje automaticky bez příkazů a konfigurace.
 
+### 🛒 IKEA ALPTALL
+**Automaticky hlídá nové produkty v kolekci ALPTALL**
+- Každý den v 9:00 (Europe/Prague) kontroluje [kolekci ALPTALL](https://www.ikea.com/cz/cs/cat/kolekce-alptall-700810/).
+- Při prvním úspěšném načtení uloží tichý výchozí stav. Později upozorní na nově přidané produkty.
+- ID cílového kanálu nastavte v `cogs/ikea.py` v konstantě `CHANNEL_ID`.
+
+
 ### Reakce
 - při 5 📌 reakcích připne zprávu v kanálu.
 
@@ -145,5 +152,6 @@ uv run python bot.py
 - `cogs/socials.py` - automatická úprava odkazů ze sociálních sítí
 - `cogs/sync.py` - sync a unsync slash commandů
 - `cogs/tinalert.py` - hlídání změn upozornění předmětu TIN
+- `cogs/ikea.py` - hlídání nových produktů v kolekci IKEA ALPTALL
 - `lib/scraper.py` - scraper pro kupi.cz
 - `tests/` - testy (pytest) s fixture stránky TIN
