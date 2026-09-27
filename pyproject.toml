@@ -5,12 +5,14 @@ description = "Discord bot pro scrapování cen vybraných artiklů"
 readme = "README.md"
 requires-python = ">=3.12.3"
 dependencies = [
+    "aiosqlite>=0.22.1",
     "babel==2.16.0",
     "beautifulsoup4==4.14.3",
     "cachetools>=7.1.4",
     "discord-py==2.7.1",
     "python-dotenv==1.2.2",
     "requests==2.33.1",
+    "sqlalchemy>=2.0.52",
 ]
 
 [dependency-groups]
