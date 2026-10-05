@@ -5,6 +5,7 @@ Discord bot v Pythonu pro trackování slev, dluhů přes API a lockin Discord c
 ## 🧠Co umí
 
 - Vyhledává akce na [kupi.cz](https://www.kupi.cz) pro vybrané produkty (Řízky, vajíčka, mleté, monstery..).
+- Zobrazuje denní menu vybraných restaurací (např. Nepal Brno).
 - Zobrazuje všechny dluhy v Flowernal API.
 - Dočasný "lockin" na Discordu - timeout a odstranění rolí.
 - Výpis logů na Discord pomocí příkazu.
@@ -38,6 +39,9 @@ Discord bot v Pythonu pro trackování slev, dluhů přes API a lockin Discord c
 - `/bezlepkovy_chlebik` - Pan Blanco chlebik 
 - `/pepsi` - 2L, 2.25L a 2.5L PET
 - `/kofola` - 2L, 2.25L a 2.5L PET
+
+### 🍛Denní menu
+- `/menu [restaurant]` - zobrazí dnešní denní menu vybrané restaurace formou Discord embedu (aktuálně: `nepal`).
 
 ### 📈📉Dluhy
 **Vypisují Flowernalovy dluhy z API**
@@ -153,5 +157,7 @@ uv run python bot.py
 - `cogs/sync.py` - sync a unsync slash commandů
 - `cogs/tinalert.py` - hlídání změn upozornění předmětu TIN
 - `cogs/ikea.py` - hlídání nových produktů v kolekci IKEA ALPTALL
+- `cogs/restaurant.py` - slash command pro denní menu restaurací
+- `lib/restaurant.py` - scraper denního menu restaurací
 - `lib/scraper.py` - scraper pro kupi.cz
 - `tests/` - testy (pytest) s fixture stránky TIN
