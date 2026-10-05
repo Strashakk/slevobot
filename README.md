@@ -61,16 +61,6 @@ Discord bot v Pythonu pro trackování slev, dluhů přes API a lockin Discord c
 **Výpis logů bota**
 - `/logs` - vrátí posledních N řádků logu, admin-only.
 
-### 📝Shrnutí chatu
-**Shrnutí posledních zpráv v aktuálním kanálu**
-- `/zhrnuti [pocet_zprav]` - shrne posledních X textových zpráv od uživatelů (bez botů).
-
-### 🌐Socials
-**Automaticky upravuje odkazy ze sociálních sítí**
-- Přepisuje odkazy z Instagramu, X a TikToku na alternativní embed-friendly domény.
-- U původní zprávy potlačí embed a pošle upravený odkaz jako odpověď.
-- Funguje automaticky bez další konfigurace.
-
 ### 📌 TIN upozornění
 **Automaticky hlídá aktuální upozornění předmětu TIN**
 - Každý den v 9:00 (Europe/Prague) stáhne stránku [TIN](https://www.fit.vut.cz/study/course/TIN/public/) a porovná sekci "Aktuální upozornění" s posledním uloženým stavem.
