@@ -10,6 +10,7 @@ Discord bot v Pythonu pro trackování slev, dluhů přes API a lockin Discord c
 - Dočasný "lockin" na Discordu - timeout a odstranění rolí.
 - Výpis logů na Discord pomocí příkazu.
 - Sleduje změny aktuálních upozornění na stránkách předmětu TIN (FIT VUT).
+- Hlídá termíny výměny ložního prádla na kolejích a upozorňuje na ně den předem.
 
 ## 🌟Hvězdná historie
 
@@ -61,6 +62,20 @@ Discord bot v Pythonu pro trackování slev, dluhů přes API a lockin Discord c
 **Výpis logů bota**
 - `/logs` - vrátí posledních N řádků logu, admin-only.
 
+### 📝Shrnutí chatu
+**Shrnutí posledních zpráv v aktuálním kanálu**
+- `/zhrnuti [pocet_zprav]` - shrne posledních X textových zpráv od uživatelů (bez botů).
+
+### 🧺Výdej ložního prádla
+**Informace o výměně ložního prádla na kolejích**
+- `/pradlo palackeho` - najde nejbližší termín výměny ložního prádla na PPV a zobrazí, zda je výdej právě dostupný.
+
+### 🌐Socials
+**Automaticky upravuje odkazy ze sociálních sítí**
+- Přepisuje odkazy z Instagramu, X a TikToku na alternativní embed-friendly domény.
+- U původní zprávy potlačí embed a pošle upravený odkaz jako odpověď.
+- Funguje automaticky bez další konfigurace.
+
 ### 📌 TIN upozornění
 **Automaticky hlídá aktuální upozornění předmětu TIN**
 - Každý den v 9:00 (Europe/Prague) stáhne stránku [TIN](https://www.fit.vut.cz/study/course/TIN/public/) a porovná sekci "Aktuální upozornění" s posledním uloženým stavem.
@@ -69,6 +84,12 @@ Discord bot v Pythonu pro trackování slev, dluhů přes API a lockin Discord c
 - Stav se ukládá do `cogs/tinalert_state.json` (runtime soubor, je v `.gitignore`).
 - Funguje automaticky bez příkazů a konfigurace.
 
+### 🧺 Upozornění na výměnu prádla
+**Automaticky hlídá termíny výměny ložního prádla na kolejích**
+- Sdružuje termíny do bloků (s tolerancí 1denních mezer pro státní svátky).
+- Den před začátkem bloku v poledne (12:00 Europe/Prague) pošle upozornění do nastaveného kanálu a označí roli pro danou kolej.
+- Po odeslání notifikace se do fronty automaticky načte další nadcházející termín.
+- Kanál je nastaven v hlavičce `cogs/pradlo.py`, role a termíny jsou konfigurovány per-kolej v registru `DORMS`.
 ### 🛒 IKEA ALPTALL
 **Automaticky hlídá nové produkty v kolekci ALPTALL**
 - Každý den v 9:00 (Europe/Prague) kontroluje [kolekci ALPTALL](https://www.ikea.com/cz/cs/cat/kolekce-alptall-700810/).
@@ -142,6 +163,7 @@ uv run python bot.py
 - `cogs/lockin.py` - lockin režim
 - `cogs/logger.py` - výpis logů
 - `cogs/pin.py` - připínání zpráv uživateli
+- `cogs/pradlo.py` - termíny výměny ložního prádla na kolejích a automatické notifikace
 - `cogs/zhrnuti.py` - shrnutí posledních zpráv v kanálu
 - `cogs/socials.py` - automatická úprava odkazů ze sociálních sítí
 - `cogs/sync.py` - sync a unsync slash commandů
