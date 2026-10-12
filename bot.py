@@ -12,6 +12,7 @@ load_dotenv()
 # Inicializace bota a nastavení práv pro čtení zpráv
 intents = discord.Intents.default()
 intents.message_content = True
+intents.members = True
 intents.reactions = True
 
 
@@ -22,10 +23,12 @@ class Slevobot(commands.Bot):
         await self.load_extension('cogs.sync')
         await self.load_extension('cogs.lockin')
         await self.load_extension('cogs.logger')
+        await self.load_extension('cogs.role_keeper')
         # await self.load_extension('cogs.socials')
         await self.load_extension('cogs.pin')
         await self.load_extension('cogs.tinalert')
         await self.load_extension('cogs.pradlo')
+        await self.load_extension('cogs.ikea')
         # await self.load_extension('cogs.zhrnuti')
 
 
