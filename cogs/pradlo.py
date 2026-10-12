@@ -10,6 +10,29 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
+
+@dataclass
+class TimeslotBlock:
+    dorm_key: str
+    dates: list[datetime]
+    start_time: datetime
+    end_time: datetime
+    slots: list[tuple[datetime, datetime]]
+
+    @property
+    def id(self) -> str:
+        first_d = self.dates[0].strftime("%Y-%m-%d")
+        last_d = self.dates[-1].strftime("%Y-%m-%d")
+        return f"{self.dorm_key}:{first_d}_{last_d}"
+
+    @property
+    def has_holiday_gap(self) -> bool:
+        for i in range(len(self.dates) - 1):
+            if (self.dates[i + 1].date() - self.dates[i].date()).days > 1:
+                return True
+        return False
+
+
 # ==============================================================================
 # KONFIGURACE NOTIFIKACÍ V HLAVIČCE SOUBORU
 # ==============================================================================
@@ -137,28 +160,6 @@ def get_slots(
             end_dt = datetime(d.year, d.month, d.day, end_h, 0, tzinfo=tz)
             slots.append((start_dt, end_dt))
     return slots
-
-
-@dataclass
-class TimeslotBlock:
-    dorm_key: str
-    dates: list[datetime]
-    start_time: datetime
-    end_time: datetime
-    slots: list[tuple[datetime, datetime]]
-
-    @property
-    def id(self) -> str:
-        first_d = self.dates[0].strftime("%Y-%m-%d")
-        last_d = self.dates[-1].strftime("%Y-%m-%d")
-        return f"{self.dorm_key}:{first_d}_{last_d}"
-
-    @property
-    def has_holiday_gap(self) -> bool:
-        for i in range(len(self.dates) - 1):
-            if (self.dates[i + 1].date() - self.dates[i].date()).days > 1:
-                return True
-        return False
 
 
 def get_timeslot_blocks(
