@@ -17,14 +17,15 @@ class Socials(commands.Cog):
                 r"https://(?:www\.)?instagram\.com/p/"),
                 r"https://www.kkinstagram.com/p/"),
             (re.compile(
-                r"https://(?:www\.)?(?:x|twitter)\.com/([^/]+)/status/(\d+)"), 
+                r"https://(?:www\.)?(?:x|twitter)\.com/([^/]+)/status/(\d+)"),
                 r"https://fixupx.com/\1/status/\2"),
             (re.compile(
-                r"https://(?:[a-zA-Z0-9-]+\.)?tiktok\.com/"), 
+                r"https://(?:[a-zA-Z0-9-]+\.)?tiktok\.com/"),
                 r"https://tnktok.com/"),
             (re.compile(
-                r"https://(?:www\.|old\.)?reddit\.com/(r/[^/]+/comments/\S+)"), 
-                r"https://vxreddit.com/\1"),
+                r"https://(?:www\.|old\.)?reddit\.com/(r/[^/]+/(?:comments|s)/\S+)"),
+                r"https://fxddit.com/\1"),
+
         ]
 
     @commands.Cog.listener()
@@ -41,7 +42,7 @@ class Socials(commands.Cog):
                 for pattern, replacement in self.translations:
                     if pattern.search(url):
                         if not supressed:
-                            # Suppress embeds from original message     
+                            # Suppress embeds from original message
                             await message.edit(suppress=True)
                             supressed = True
                         # Remove query parameters

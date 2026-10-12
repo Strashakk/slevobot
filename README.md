@@ -8,6 +8,7 @@ Discord bot v Pythonu pro trackování slev, dluhů přes API a lockin Discord c
 - Zobrazuje všechny dluhy v Flowernal API.
 - Dočasný "lockin" na Discordu - timeout a odstranění rolí.
 - Výpis logů na Discord pomocí příkazu.
+- Sleduje změny aktuálních upozornění na stránkách předmětu TIN (FIT VUT).
 
 ## 🌟Hvězdná historie
 
@@ -56,11 +57,31 @@ Discord bot v Pythonu pro trackování slev, dluhů přes API a lockin Discord c
 **Výpis logů bota**
 - `/logs` - vrátí posledních N řádků logu, admin-only.
 
-### 🌐Socials
-**Automaticky upravuje odkazy ze sociálních sítí**
-- Přepisuje odkazy z Instagramu, X a TikToku na alternativní embed-friendly domény.
-- U původní zprávy potlačí embed a pošle upravený odkaz jako odpověď.
-- Funguje automaticky bez další konfigurace.
+### 📌 TIN upozornění
+**Automaticky hlídá aktuální upozornění předmětu TIN**
+- Každý den v 9:00 (Europe/Prague) stáhne stránku [TIN](https://www.fit.vut.cz/study/course/TIN/public/) a porovná sekci "Aktuální upozornění" s posledním uloženým stavem.
+- Pokud se obsah změnil, pošle upozornění do přednastaveného kanálu.
+- Změny pouze v HTML komentářích se ignorují, aby nevyvolávaly falešná upozornění.
+- Stav se ukládá do `cogs/tinalert_state.json` (runtime soubor, je v `.gitignore`).
+- Funguje automaticky bez příkazů a konfigurace.
+
+### 🛒 IKEA ALPTALL
+**Automaticky hlídá nové produkty v kolekci ALPTALL**
+- Každý den v 9:00 (Europe/Prague) kontroluje [kolekci ALPTALL](https://www.ikea.com/cz/cs/cat/kolekce-alptall-700810/).
+- Při prvním úspěšném načtení uloží tichý výchozí stav. Později upozorní na nově přidané produkty.
+- ID cílového kanálu nastavte v `cogs/ikea.py` v konstantě `CHANNEL_ID`.
+
+
+### Reakce
+- při 5 📌 reakcích připne zprávu v kanálu.
+
+## 🧪 Testy
+
+Testy se spouští přes `pytest`:
+
+```bash
+uv run pytest
+```
 
 ## 📚 Požadavky
 
@@ -77,6 +98,10 @@ Vytvoř soubor `.env` v rootu repa a doplň do něj alespoň token:
 DISCORD_TOKEN=TVUJ_TOKEN
 HOME_CHANNEL_ID=123456789012345678
 DISCORD_GUILD_ID=123456789012345678
+OPENAI_API_KEY=sk-...
+OPENAI_MODEL=gpt-4o-mini
+# volitelné (výchozí je OpenAI endpoint):
+# AI_SUMMARY_API_URL=https://api.openai.com/v1/chat/completions
 ```
 
 `HOME_CHANNEL_ID` a `DISCORD_GUILD_ID` jsou volitelné. Pokud je `HOME_CHANNEL_ID` nastavený, bot po startu pošle zprávu do daného kanálu. `DISCORD_GUILD_ID` se používá pro rychlejší sync slash commandů, není však potřeba.
@@ -112,6 +137,11 @@ uv run python bot.py
 - `cogs/dluhy.py` - příkazy pro dluhy
 - `cogs/lockin.py` - lockin režim
 - `cogs/logger.py` - výpis logů
+- `cogs/pin.py` - připínání zpráv uživateli
+- `cogs/zhrnuti.py` - shrnutí posledních zpráv v kanálu
 - `cogs/socials.py` - automatická úprava odkazů ze sociálních sítí
 - `cogs/sync.py` - sync a unsync slash commandů
+- `cogs/tinalert.py` - hlídání změn upozornění předmětu TIN
+- `cogs/ikea.py` - hlídání nových produktů v kolekci IKEA ALPTALL
 - `lib/scraper.py` - scraper pro kupi.cz
+- `tests/` - testy (pytest) s fixture stránky TIN

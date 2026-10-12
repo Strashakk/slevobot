@@ -16,6 +16,10 @@ dependencies = [
 [dependency-groups]
 dev = [
     "mypy>=2.1.0",
+    "pytest>=9.1.1",
     "ruff>=0.15.14",
     "types-requests>=2.33.0.20260518",
 ]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
