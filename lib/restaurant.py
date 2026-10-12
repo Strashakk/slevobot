@@ -1,6 +1,8 @@
 import re
-from typing import Literal, TypeAlias, TypedDict
+import unicodedata
+from typing import TypeAlias, TypedDict
 
+from babel.dates import get_day_names
 from bs4 import BeautifulSoup
 from cachetools.func import ttl_cache
 import requests
@@ -15,31 +17,43 @@ class MenuItems(TypedDict):
     items: list[MenuItem]
 
 
-DayOfWeek: TypeAlias = Literal["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+DayOfWeek: TypeAlias = str
+WEEKDAYS: tuple[DayOfWeek, ...] = tuple(get_day_names("wide", locale="en")[i] for i in range(7))
 WeeklyMenu: TypeAlias = dict[DayOfWeek, MenuItems]
 
-DAY_MAPPING: dict[str, DayOfWeek] = {
-    "monday": "Monday",
-    "pondělí": "Monday",
-    "pondeli": "Monday",
-    "tuesday": "Tuesday",
-    "úterý": "Tuesday",
-    "utery": "Tuesday",
-    "wednesday": "Wednesday",
-    "středa": "Wednesday",
-    "streda": "Wednesday",
-    "thursday": "Thursday",
-    "čtvrtek": "Thursday",
-    "ctvrtek": "Thursday",
-    "friday": "Friday",
-    "pátek": "Friday",
-    "patek": "Friday",
-    "saturday": "Saturday",
-    "sobota": "Saturday",
-    "sunday": "Sunday",
-    "neděle": "Sunday",
-    "nedele": "Sunday",
-}
+
+def _strip_accents(text: str) -> str:
+    """Normalize text by stripping diacritics."""
+    return "".join(
+        c for c in unicodedata.normalize("NFKD", text)
+        if not unicodedata.combining(c)
+    )
+
+
+def _build_day_mapping(locales: tuple[str, ...] = ("en", "cs")) -> dict[str, DayOfWeek]:
+    """Generate mapping from localized day names and unaccented variations to DayOfWeek."""
+    mapping: dict[str, DayOfWeek] = {}
+    for loc in locales:
+        day_names = get_day_names("wide", locale=loc)
+        for i, en_name in enumerate(WEEKDAYS):
+            name = day_names[i].lower()
+            mapping[name] = en_name
+            unaccented = _strip_accents(name)
+            if unaccented != name:
+                mapping[unaccented] = en_name
+    return mapping
+
+
+DAY_MAPPING: dict[str, DayOfWeek] = _build_day_mapping()
+
+
+def parse_day_of_week(text: str) -> DayOfWeek | None:
+    """Parse DayOfWeek from heading or title text."""
+    norm_text = _strip_accents(text).lower()
+    for key, day in DAY_MAPPING.items():
+        if key in norm_text:
+            return day
+    return None
 
 user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
 
@@ -61,13 +75,7 @@ class RestaurantScraper:
             if not title_elem:
                 continue
 
-            title_text = title_elem.get_text().strip().lower()
-            day_name: DayOfWeek | None = None
-            for key, day in DAY_MAPPING.items():
-                if key in title_text:
-                    day_name = day
-                    break
-
+            day_name = parse_day_of_week(title_elem.get_text())
             if not day_name:
                 continue
 

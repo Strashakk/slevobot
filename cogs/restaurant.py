@@ -3,34 +3,15 @@ import logging
 from typing import Literal
 from zoneinfo import ZoneInfo
 
+from babel.dates import format_date
 import discord
 from discord import app_commands
 from discord.ext import commands
 import requests
 
-from lib.restaurant import DayOfWeek, RestaurantScraper
+from lib.restaurant import WEEKDAYS, DayOfWeek, RestaurantScraper
 
 log = logging.getLogger("slevobot.cogs.restaurant")
-
-WEEKDAYS: tuple[DayOfWeek, ...] = (
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-    "Sunday",
-)
-
-DAY_NAMES_CZ = {
-    "Monday": "Pondělí",
-    "Tuesday": "Úterý",
-    "Wednesday": "Středa",
-    "Thursday": "Čtvrtek",
-    "Friday": "Pátek",
-    "Saturday": "Sobota",
-    "Sunday": "Neděle",
-}
 
 RestaurantChoice = Literal["nepal"]
 
@@ -62,8 +43,8 @@ class Restaurant(commands.Cog):
         await interaction.response.defer()
 
         now = datetime.now(ZoneInfo("Europe/Prague"))
-        today = WEEKDAYS[now.weekday()]
-        today_cz = DAY_NAMES_CZ.get(today, today)
+        today: DayOfWeek = WEEKDAYS[now.weekday()]
+        today_cz = format_date(now, "EEEE", locale="cs").capitalize()
 
         match restaurant:
             case "nepal":
