@@ -3,7 +3,7 @@ from collections import deque
 import logging
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from typing import Any
+from typing import NotRequired, TypedDict
 from zoneinfo import ZoneInfo
 
 import discord
@@ -87,8 +87,18 @@ palackeho: list[datetime] = [
     datetime(2027, 6, 17),
 ]
 
+
+class DormInfo(TypedDict):
+    """Struktura záznamu koleje pro výdej prádla."""
+
+    name: str
+    dates: list[datetime]
+    role_id: NotRequired[int]
+    hours: NotRequired[list[tuple[int, int]]]
+
+
 # Registr kolejí (každá kolej má vlastní role_id a termíny)
-DORMS: dict[str, dict[str, Any]] = {
+DORMS: dict[str, DormInfo] = {
     "palackeho": {
         "name": "Palackého vrch (PPV)",
         "dates": palackeho,
@@ -121,7 +131,7 @@ def get_slots(
 ) -> list[tuple[datetime, datetime]]:
     """Univerzální funkce pro vygenerování všech časových slotů (od, do) pro libovolné datumy a hodiny."""
     slots: list[tuple[datetime, datetime]] = []
-    for d in sorted(dates):
+    for d in dates:
         for start_h, end_h in hours:
             start_dt = datetime(d.year, d.month, d.day, start_h, 0, tzinfo=tz)
             end_dt = datetime(d.year, d.month, d.day, end_h, 0, tzinfo=tz)
@@ -165,11 +175,10 @@ def get_timeslot_blocks(
     if not dates:
         return []
 
-    unique_dates = sorted({d.replace(hour=0, minute=0, second=0, microsecond=0) for d in dates})
-    current_group: list[datetime] = [unique_dates[0]]
+    current_group: list[datetime] = [dates[0]]
     blocks: list[TimeslotBlock] = []
 
-    for d in unique_dates[1:]:
+    for d in dates[1:]:
         prev_d = current_group[-1]
         diff_days = (d.date() - prev_d.date()).days
         # diff_days == 1: po sobě jdoucí dny
@@ -232,7 +241,7 @@ def get_pickup_status(
 
 def build_dorm_queue(
     dorm_key: str,
-    dorm_info: dict[str, Any],
+    dorm_info: DormInfo,
     now: datetime,
 ) -> deque[tuple[datetime, TimeslotBlock]]:
     """Vytvoří seřazenou frontu nadcházejících notifikací pro konkrétní kolej (den před začátkem v poledne)."""
