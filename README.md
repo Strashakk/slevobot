@@ -11,6 +11,7 @@ Discord bot v Pythonu pro trackování slev, dluhů přes API a lockin Discord c
 - Výpis logů na Discord pomocí příkazu.
 - Sleduje změny aktuálních upozornění na stránkách předmětu TIN (FIT VUT).
 - Hlídá termíny výměny ložního prádla na kolejích a upozorňuje na ně den předem.
+- Hraje slovní fotbal ve vyhrazeném kanálu – další slovo musí začínat písmenem, kterým končí předchozí.
 
 ## 🌟Hvězdná historie
 
@@ -96,6 +97,15 @@ Discord bot v Pythonu pro trackování slev, dluhů přes API a lockin Discord c
 - Při prvním úspěšném načtení uloží tichý výchozí stav. Později upozorní na nově přidané produkty.
 - ID cílového kanálu nastavte v `cogs/ikea.py` v konstantě `CHANNEL_ID`.
 
+### ⚽ Slovní fotbal
+**Automaticky hlídá řetěz slov ve vyhrazeném kanálu**
+- Další zpráva musí začínat písmenem, kterým končí předchozí slovo (`ch` se počítá jako jedno písmeno).
+- Hráč nemůže navazovat sám na sebe – musí počkat na jiného hráče.
+- Chybná zpráva se smaže a bot pošle krátkou nápovědu s očekávaným písmenem (ta se po chvíli sama smaže).
+- Stav řetězu se při startu bota načte živě z posledních zpráv v kanálu, nemá žádnou perzistenci.
+- Kanál je nastaven v hlavičce `cogs/slovni_fotbal.py` v konstantě `CHANNEL_ID`.
+- Funguje automaticky bez příkazů.
+
 
 ### Reakce
 - při 5 📌 reakcích připne zprávu v kanálu.
@@ -167,6 +177,7 @@ uv run python bot.py
 - `cogs/zhrnuti.py` - shrnutí posledních zpráv v kanálu
 - `cogs/socials.py` - automatická úprava odkazů ze sociálních sítí
 - `cogs/sync.py` - sync a unsync slash commandů
+- `cogs/slovni_fotbal.py` - slovní fotbal ve vyhrazeném kanálu
 - `cogs/tinalert.py` - hlídání změn upozornění předmětu TIN
 - `cogs/ikea.py` - hlídání nových produktů v kolekci IKEA ALPTALL
 - `cogs/restaurant.py` - slash command pro denní menu restaurací

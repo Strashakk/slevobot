@@ -30,6 +30,7 @@ class Slevobot(commands.Bot):
         await self.load_extension('cogs.pradlo')
         await self.load_extension('cogs.ikea')
         await self.load_extension('cogs.restaurant')
+        await self.load_extension('cogs.slovni_fotbal')
         # await self.load_extension('cogs.zhrnuti')
 
 
