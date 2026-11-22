@@ -90,8 +90,9 @@ class TimeoutCog(commands.Cog):
 
         await self._dm_member(member, guild, reason, until)
 
+        # replied_user=False zajistí, že odpověď nepinguje autora původního příkazu
         no_ping_mentions = discord.AllowedMentions(
-            users=False, roles=False, everyone=False
+            users=False, roles=False, everyone=False, replied_user=False
         )
         await ctx.reply(
             f"{member.mention} dostal timeout do "
